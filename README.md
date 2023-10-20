@@ -133,6 +133,6 @@ Abaixo temos uma lista de pessoas que participaram deste projeto ao longo dos an
 
 | E-mail | Nome | Função |
 | ------ | ---- | ------ |
-| pedro.coding.contact@gmail.com | Pedro Martins Pereira | Líder Técnico | 
+| pedro.generic.email@gmail.com | Pedro Martins Pereira | Líder Técnico | 
 | alisson.silva.3366@gmail.com | Alisson Silva dos Santos | Engenheiro Backend | 
 | ievsouza622@gmail.com | Iev de Souza Cruz | Engenheiro Backend | 
