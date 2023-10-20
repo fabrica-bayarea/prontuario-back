@@ -9,3 +9,47 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+// Definição do modelo de Curso
+model Curso {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  programas Programa[]
+}
+
+// Definição do modelo de Programa Social
+model Programa {
+  id            Int          @id @default(autoincrement())
+  nome          String
+  curso         Curso        @relation(fields: [cursoId], references: [id])
+  cursoId       Int
+  atendimentos  Atendimento[]
+}
+
+// Definição do modelo de Usuário
+model Usuario {
+  id             Int            @id @default(autoincrement())
+  nome           String
+  email          String         @unique
+  telefone       String?
+  tipo           String         // A ideia é usar essa coluna para distinguir entre "administrador" e "cadastrador"
+  atendimentos   Atendimento[]  // Atendimentos criados pelo usuário
+}
+
+// Definição do modelo de Beneficiário
+model Beneficiario {
+  id      Int      @id @default(autoincrement())
+  nome    String
+  email   String?
+  telefone String?
+}
+
+// Definição do modelo de Atendimento
+model Atendimento {
+  id        Int      @id @default(autoincrement())
+  data      DateTime
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
+  usuarioId Int
+  programa  Programa @relation(fields: [programaId], references: [id])
+  programaId Int
+}
