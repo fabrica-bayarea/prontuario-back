@@ -26,22 +26,35 @@ model Programa {
   atendimentos  Atendimento[]
 }
 
+enum TipoUsuario {
+    ADMINISTRADOR
+    CADASTRADOR
+}
+
 // Definição do modelo de Usuário
 model Usuario {
   id             Int            @id @default(autoincrement())
   nome           String
   email          String         @unique
-  telefone       String?
-  tipo           String         // A ideia é usar essa coluna para distinguir entre "administrador" e "cadastrador"
+  telefone       String?        @unique
+  hash           String
+  tipo           TipoUsuario 
   atendimentos   Atendimento[]  // Atendimentos criados pelo usuário
+}
+
+enum TipoBeneficiario {
+    BENEFICIARIO
 }
 
 // Definição do modelo de Beneficiário
 model Beneficiario {
-  id      Int      @id @default(autoincrement())
-  nome    String
-  email   String?
-  telefone String?
+  id       Int      @id @default(autoincrement())
+  nome     String
+  cpf      String   @unique
+  email    String   @unique
+  telefone String   @unique
+  tipo     TipoBeneficiario 
+  hash     String
 }
 
 // Definição do modelo de Atendimento
