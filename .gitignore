@@ -2,6 +2,10 @@
 /dist
 /node_modules
 
+# Sensitive data
+.env
+docker-compose.yml
+
 # Logs
 logs
 *.log
