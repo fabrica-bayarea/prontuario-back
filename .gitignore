@@ -4,7 +4,6 @@
 
 # Sensitive data
 .env
-docker-compose.yml
 
 # Logs
 logs

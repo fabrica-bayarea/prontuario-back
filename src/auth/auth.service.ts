@@ -56,7 +56,7 @@ export class AuthService {
     } catch (err) {
       if (err instanceof PrismaClientKnownRequestError) {
         if (err.code === 'P2002') {
-          throw new ForbiddenException('credentials taken');
+          throw new ForbiddenException('Credenciais tomadas');
         }
       }
       throw err;
