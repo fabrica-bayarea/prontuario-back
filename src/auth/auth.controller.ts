@@ -11,10 +11,9 @@ export class AuthController {
     return this.authService.signUpUsuario(dto);
   }
 
-  // Alterar signIn para signInUsuario? Apenas para padronizar? Pedro
   @HttpCode(HttpStatus.OK)
   @Post('signin/usuario')
-  signIn(@Body() dto: SignInUsuarioDto) {
+  signInUsuario(@Body() dto: SignInUsuarioDto) {
     return this.authService.signInUsuario(dto);
   }
 
