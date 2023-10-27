@@ -2,7 +2,12 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { SignInUsuarioDto, SignUpUsuarioDto } from './dto/auth.dto';
+import {
+  SignInUsuarioDto,
+  SignUpUsuarioDto,
+  SignInBeneficiarioDto,
+  SignUpBeneficiarioDto,
+} from './dto/auth.dto';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import * as argon from 'argon2';
 
@@ -63,6 +68,39 @@ export class AuthService {
     }
   }
 
+  async signUpBeneficiario(
+    dto: SignUpBeneficiarioDto,
+  ): Promise<{ access_token: string } | never> {
+    const hash = await argon.hash(dto.senha);
+    try {
+      const dadosBeneficiario: any = {
+        nome: dto.nome,
+        cpf: dto.cpf,
+        email: dto.email,
+        telefone: dto.telefone,
+        tipo: dto.tipo,
+        hash: hash,
+      };
+      if (dto.telefone) {
+        dadosBeneficiario.telefone = dto.telefone;
+      }
+
+      const beneficiario = await this.prisma.beneficiario.create({
+        data: dadosBeneficiario,
+      });
+
+      delete beneficiario.hash;
+      return this.signToken(beneficiario.id, beneficiario.tipo);
+    } catch (err) {
+      if (err instanceof PrismaClientKnownRequestError) {
+        if (err.code === 'P2002') {
+          throw new ForbiddenException('Credenciais tomadas');
+        }
+      }
+      throw err;
+    }
+  }
+
   async signInUsuario(
     dto: SignInUsuarioDto,
   ): Promise<{ access_token: string } | never> {
@@ -76,5 +114,20 @@ export class AuthService {
 
     if (!senhaCorreta) throw new ForbiddenException('Credenciais incorretas');
     return this.signToken(usuario.id, usuario.tipo);
+  }
+
+  async signInBeneficiario(
+    dto: SignInBeneficiarioDto,
+  ): Promise<{ access_token: string } | never> {
+    const beneficiario = await this.prisma.beneficiario.findUnique({
+      where: { cpf: dto.cpf},
+    })
+
+    if (!beneficiario) throw new ForbiddenException('Credenciais inválidas');
+
+    const senhaCorreta = await argon.verify(beneficiario.hash, dto.senha);
+
+    if (!senhaCorreta) throw new ForbiddenException('Credenciais incorretas');
+    return this.signToken(beneficiario.id, beneficiario.tipo)
   }
 }

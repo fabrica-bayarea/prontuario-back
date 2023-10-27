@@ -1,6 +1,6 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { SignInUsuarioDto, SignUpUsuarioDto } from './dto/auth.dto';
+import { SignInBeneficiarioDto, SignInUsuarioDto, SignUpBeneficiarioDto, SignUpUsuarioDto } from './dto/auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -11,9 +11,21 @@ export class AuthController {
     return this.authService.signUpUsuario(dto);
   }
 
+  // Alterar signIn para signInUsuario? Apenas para padronizar? Pedro
   @HttpCode(HttpStatus.OK)
   @Post('signin/usuario')
   signIn(@Body() dto: SignInUsuarioDto) {
     return this.authService.signInUsuario(dto);
+  }
+
+  @Post('signup/beneficiario')
+  signUpBeneficiario(@Body() dto: SignUpBeneficiarioDto){
+    return this.authService.signUpBeneficiario(dto);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('signin/beneficiario')
+  signInBeneficiario(@Body() dto: SignInBeneficiarioDto){
+    return this.authService.signInBeneficiario(dto);
   }
 }
