@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -10,6 +14,7 @@ import {
 } from './dto/auth.dto';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import * as argon from 'argon2';
+import { Beneficiario } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -119,15 +124,32 @@ export class AuthService {
   async signInBeneficiario(
     dto: SignInBeneficiarioDto,
   ): Promise<{ access_token: string } | never> {
-    const beneficiario = await this.prisma.beneficiario.findUnique({
-      where: { cpf: dto.cpf},
-    })
+    if (!dto.cpf && !dto.email) {
+      throw new BadRequestException('É necessário fornecer CPF ou email.');
+    }
 
-    if (!beneficiario) throw new ForbiddenException('Credenciais inválidas');
+    let beneficiario: Beneficiario;
+
+    if (dto.cpf) {
+      beneficiario = await this.prisma.beneficiario.findUnique({
+        where: { cpf: dto.cpf },
+      });
+    } else if (dto.email) {
+      beneficiario = await this.prisma.beneficiario.findUnique({
+        where: { email: dto.email },
+      });
+    }
+
+    if (!beneficiario) {
+      throw new ForbiddenException('Credenciais inválidas');
+    }
 
     const senhaCorreta = await argon.verify(beneficiario.hash, dto.senha);
 
-    if (!senhaCorreta) throw new ForbiddenException('Credenciais incorretas');
-    return this.signToken(beneficiario.id, beneficiario.tipo)
+    if (!senhaCorreta) {
+      throw new ForbiddenException('Credenciais incorretas');
+    }
+
+    return this.signToken(beneficiario.id, beneficiario.tipo);
   }
 }
