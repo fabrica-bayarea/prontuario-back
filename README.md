@@ -7,6 +7,8 @@
   - [Roadmap](#versão-1)
   - [Funcionalidades](#funcionalidades)
   - [Tecnologias](#tecnologias)
+- [Executando o Projeto](#executando-o-projeto)
+  - [Dependências](#dependências)
   - [Rodando localmente](#rodando-localmente)
 - [Autores](#autores)
   - [Equipe 1º/2023](#equipe-12023)
@@ -42,6 +44,14 @@ O objetivo da versão 1 é entregar um sistema que permita o registro dos seguin
 - PostgreSQL
 - Docker
 
+# Executando o Projeto
+
+## Dependências
+
+Antes de começar, certifique-se de ter as seguintes ferramentas instaladas em seu ambiente de desenvolvimento:
+- Node.js: [Instalação do Node.js](https://nodejs.org/)
+- Docker: [Instalação do Docker](https://docs.docker.com/desktop/install/linux-install/)
+
 ## Rodando localmente
 
 Clone o projeto:
@@ -50,7 +60,7 @@ Clone o projeto:
 git clone https://github.com/fabrica-bayarea/prontuario-back.git
 ```
 
-Mude para a pasta recém-criada:
+Navegue para a pasta recém-criada:
 
 ```bash
 cd prontuario-back 
@@ -67,61 +77,47 @@ Crie um arquivo .env na raíz do projeto e adicione as seguintes variáveis de a
 ```sh
 DATABASE_URL="postgresql://usuario:senha@host:port/nome_do_banco?schema=nome_do_schema"
 JWT_SECRET="seu segredo"
+POSTGRES_USER=usuario_postgres
+POSTGRES_PASSWORD=senha_postgres
+POSTGRES_DB=db_postgres
 ```
 
-Crie um arquivo docker-compose.yml
-
-```dockerfile
-version: '3'
-services:
-  postgres:
-    image: 'postgres:14.5'
-    restart: always
-    environment:
-      POSTGRES_USER: <seu_usuario> 
-      POSTGRES_PASSWORD: <sua_senha> 
-      POSTGRES_DB: todo 
-    logging:
-      options:
-        max-size: 10m
-        max-file: "3"
-    ports:
-      - '5435:5432'
-    volumes:
-      - ./postgres-data:/var/lib/postgresql/data
-      - ./sql/users.sql:/docker-entrypoint-initdb.d/create_tables.sql
-```
-
-Suba o banco de dados:
+Suba o banco de dados com o docker:
 
 ```sh
 docker-compose up -d
 
 ```
 
+Aplique as migrações necessárias:
+
+```sh
+npx prisma migrate dev
+```
+
 Inicie a aplicação:
 
 ```bash
-# development
+# desenvolvimento 
 $ npm run start
 
-# watch mode
+# hot reload 
 $ npm run start:dev
 
-# production mode
+# produção 
 $ npm run start:prod
 ```
 
 Executando os testes:
 
 ```bash
-# unit tests
+# testes unitários 
 $ npm run test
 
-# e2e tests
+# testes end to end 
 $ npm run test:e2e
 
-# test coverage
+# cobertura de testes 
 $ npm run test:cov
 ```
 
