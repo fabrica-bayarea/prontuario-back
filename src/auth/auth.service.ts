@@ -152,4 +152,20 @@ export class AuthService {
 
     return this.signToken(beneficiario.id, beneficiario.tipo);
   }
+
+  async isAdministrator(idUsuario: number): Promise<boolean> {
+    const usuario = await this.prisma.usuario.findUnique({
+      where: { id: idUsuario },
+    });
+
+    return usuario?.tipo === 'ADMINISTRADOR';
+  }
+
+  async isCadastrador(idUsuario: number): Promise<boolean> {
+    const usuario = await this.prisma.usuario.findUnique({
+      where: { id: idUsuario },
+    });
+
+    return usuario?.tipo === 'CADASTRADOR';
+  }
 }
