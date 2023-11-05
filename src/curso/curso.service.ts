@@ -23,7 +23,7 @@ export class CursoService {
 
     if (!isAdministrator) {
       throw new ForbiddenException(
-        'You do not have permission to create a Curso.',
+        'permissões insuficientes.',
       );
     }
 
@@ -43,7 +43,7 @@ export class CursoService {
 
     if (!isAdministrator) {
       throw new ForbiddenException(
-        'You do not have permission to update a Curso.',
+        'permissões insuficientes.',
       );
     }
 
@@ -52,7 +52,7 @@ export class CursoService {
     });
 
     if (!curso) {
-      throw new NotFoundException(`Curso with ID ${id} not found`);
+      throw new NotFoundException(`curso com ID ${id} não encontrado`);
     }
 
     return this.prisma.curso.update({
@@ -69,7 +69,7 @@ export class CursoService {
     });
 
     if (!curso) {
-      throw new NotFoundException(`Curso with ID ${id} not found`);
+      throw new NotFoundException(`curso com ID ${id} não encontrado`);
     }
 
     return curso;
@@ -84,7 +84,7 @@ export class CursoService {
 
     if (!isAdministrator) {
       throw new ForbiddenException(
-        'You do not have permission to delete a Curso.',
+        'permissões insuficientes.',
       );
     }
 
@@ -93,7 +93,7 @@ export class CursoService {
     });
 
     if (!curso) {
-      throw new NotFoundException(`Curso with ID ${id} not found`);
+      throw new NotFoundException(`curso com ID ${id} não encontrado`);
     }
 
     return this.prisma.curso.delete({
