@@ -6,7 +6,7 @@ import {
   SignUpBeneficiarioDto,
   SignUpUsuarioDto,
 } from './dto/auth.dto';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Cadastro e Login')
 @Controller('auth')
@@ -17,6 +17,8 @@ export class AuthController {
     summary: 'Cadastra um novo Usuário',
     description: 'Cria um novo usuário e o grava em banco de dados',
   })
+  @ApiResponse({ status: 201, description: 'Usuário cadastrado com sucesso' })
+  @ApiResponse({ status: 403, description: 'Credenciais tomadas' })
   @Post('signup/usuario')
   signUpUsuario(@Body() dto: SignUpUsuarioDto) {
     return this.authService.signUpUsuario(dto);
@@ -27,6 +29,9 @@ export class AuthController {
     description:
       'Autentica um usuário, e, caso encontrado em banco de dados, permite o acesso desse usuário',
   })
+  @ApiResponse({ status: 200, description: 'Usuário autenticado com sucesso' })
+  @ApiResponse({ status: 403, description: 'Credenciais tomadas' })
+  @ApiResponse({ status: 403, description: 'Credenciais inválidas' })
   @HttpCode(HttpStatus.OK)
   @Post('signin/usuario')
   signInUsuario(@Body() dto: SignInUsuarioDto) {
@@ -38,6 +43,8 @@ export class AuthController {
     description:
       'Cria um novo usuário "Beneficiário" e o grava em banco de dados',
   })
+  @ApiResponse({ status: 201, description: 'Usuário criado com sucesso' })
+  @ApiResponse({ status: 403, description: 'Credenciais tomadas' })
   @Post('signup/beneficiario')
   signUpBeneficiario(@Body() dto: SignUpBeneficiarioDto) {
     return this.authService.signUpBeneficiario(dto);
@@ -48,6 +55,9 @@ export class AuthController {
     description:
       'Autentica um usuário "Beneficiário", e, caso encontrado em banco de dados, permite o acesso desse usuário',
   })
+  @ApiResponse({ status: 200, description: 'Usuário autenticado com sucesso' })
+  @ApiResponse({ status: 403, description: 'Credenciais tomadas' })
+  @ApiResponse({ status: 403, description: 'Credenciais inválidas' })
   @HttpCode(HttpStatus.OK)
   @Post('signin/beneficiario')
   signInBeneficiario(@Body() dto: SignInBeneficiarioDto) {
