@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { CursoModule } from './curso/curso.module';
+import { ProgramaModule } from './programa/programa.module';
 
 @Module({
   imports: [
@@ -10,6 +11,7 @@ import { CursoModule } from './curso/curso.module';
     PrismaModule,
     AuthModule,
     CursoModule,
+    ProgramaModule,
   ],
   controllers: [],
   providers: [],
