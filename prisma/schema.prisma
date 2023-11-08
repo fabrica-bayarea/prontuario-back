@@ -47,21 +47,24 @@ enum TipoBeneficiario {
 
 // Definição do modelo de Beneficiário
 model Beneficiario {
-  id       Int              @id @default(autoincrement())
-  nome     String
-  cpf      String           @unique
-  email    String           @unique
-  telefone String           @unique
-  tipo     TipoBeneficiario
-  hash     String
+  id          Int              @id @default(autoincrement())
+  nome        String
+  cpf         String           @unique
+  email       String           @unique
+  telefone    String           @unique
+  tipo        TipoBeneficiario
+  hash        String
+  Atendimento Atendimento[]
 }
 
 // Definição do modelo de Atendimento
 model Atendimento {
-  id         Int      @id @default(autoincrement())
-  data       DateTime
-  usuario    Usuario  @relation(fields: [usuarioId], references: [id])
-  usuarioId  Int
-  programa   Programa @relation(fields: [programaId], references: [id])
-  programaId Int
+  id             Int          @id @default(autoincrement())
+  data           DateTime
+  beneficiario   Beneficiario @relation(fields: [beneficiarioId], references: [id])
+  beneficiarioId Int
+  usuario        Usuario      @relation(fields: [usuarioId], references: [id])
+  usuarioId      Int
+  programa       Programa     @relation(fields: [programaId], references: [id])
+  programaId     Int
 }

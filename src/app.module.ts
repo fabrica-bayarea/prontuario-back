@@ -4,6 +4,7 @@ import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { CursoModule } from './curso/curso.module';
 import { ProgramaModule } from './programa/programa.module';
+import { AtendimentoModule } from './atendimento/atendimento.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { ProgramaModule } from './programa/programa.module';
     AuthModule,
     CursoModule,
     ProgramaModule,
+    AtendimentoModule,
   ],
   controllers: [],
   providers: [],
