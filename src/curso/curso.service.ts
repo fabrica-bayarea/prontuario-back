@@ -22,9 +22,7 @@ export class CursoService {
     const isAdministrator = await this.authService.isAdministrator(idUsuario);
 
     if (!isAdministrator) {
-      throw new ForbiddenException(
-        'permissões insuficientes.',
-      );
+      throw new ForbiddenException('permissões insuficientes.');
     }
 
     return this.prisma.curso.create({
@@ -42,9 +40,7 @@ export class CursoService {
     const isAdministrator = await this.authService.isAdministrator(idUsuario);
 
     if (!isAdministrator) {
-      throw new ForbiddenException(
-        'permissões insuficientes.',
-      );
+      throw new ForbiddenException('permissões insuficientes.');
     }
 
     const curso = await this.prisma.curso.findUnique({
@@ -76,16 +72,14 @@ export class CursoService {
   }
 
   async getAllCursos(): Promise<Curso[]> {
-    return this.prisma.curso.findMany();
+    return this.prisma.curso.findMany({ include: { programas: true } });
   }
 
   async deleteCurso(idUsuario: number, id: number): Promise<Curso> {
     const isAdministrator = await this.authService.isAdministrator(idUsuario);
 
     if (!isAdministrator) {
-      throw new ForbiddenException(
-        'permissões insuficientes.',
-      );
+      throw new ForbiddenException('permissões insuficientes.');
     }
 
     const curso = await this.prisma.curso.findUnique({
@@ -106,6 +100,7 @@ export class CursoService {
       where: {
         nome: {
           contains: name,
+          mode: 'insensitive',
         },
       },
     });
