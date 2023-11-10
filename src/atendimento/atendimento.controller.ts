@@ -19,8 +19,7 @@ import {
   GetAtendimentoByCpfDto,
   UpdateDataAtendimentoDto,
 } from './atendimento.dto';
-import {ApiOperation, ApiResponse, ApiTags} from '@nestjs/swagger'
-
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Operações de manutenção de Atendimentos')
 @Controller('atendimentos')
@@ -28,9 +27,12 @@ import {ApiOperation, ApiResponse, ApiTags} from '@nestjs/swagger'
 export class AtendimentoController {
   constructor(private readonly atendimentoService: AtendimentoService) {}
 
-  @ApiOperation({summary: 'Cadastra um novo Atendimento', description: 'Cadastra um novo Atendimento e o grava em banco de dados'})
-  @ApiResponse({status: 201, description: 'Atendimento criado com sucesso'})
-  @ApiResponse({status: 403, description: 'Permissões insuficientes'})
+  @ApiOperation({
+    summary: 'Cadastra um novo Atendimento',
+    description: 'Cadastra um novo Atendimento e o grava em banco de dados',
+  })
+  @ApiResponse({ status: 201, description: 'Atendimento criado com sucesso' })
+  @ApiResponse({ status: 403, description: 'Permissões insuficientes' })
   @Post()
   async createAtendimento(
     @Request() req: any,
@@ -48,7 +50,10 @@ export class AtendimentoController {
     summary: 'Operação de listagem de Atendimentos',
     description: 'Retorna a lista atualizada de todos os Atendimentos',
   })
-  @ApiResponse({ status: 200, description: 'Atendimentos listados com sucesso' })
+  @ApiResponse({
+    status: 200,
+    description: 'Atendimentos listados com sucesso',
+  })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @Get()
   async getAllAtendimentos(): Promise<AtendimentoResponse[]> {
@@ -57,9 +62,13 @@ export class AtendimentoController {
 
   @ApiOperation({
     summary: 'Operação de listagem de Atendimentos por CPF',
-    description: 'Retorna a lista atualizada de todos os Atendimentos associados a um CPF',
+    description:
+      'Retorna a lista atualizada de todos os Atendimentos associados a um CPF',
   })
-  @ApiResponse({ status: 200, description: 'Atendimentos listados com sucesso' })
+  @ApiResponse({
+    status: 200,
+    description: 'Atendimentos listados com sucesso',
+  })
   @ApiResponse({ status: 404, description: 'Atendimentos não encontrados' })
   @Get()
   async getAtendimentosByCpf(
@@ -70,9 +79,13 @@ export class AtendimentoController {
 
   @ApiOperation({
     summary: 'Operação de listagem de Atendimentos por intervalo de datas',
-    description: 'Retorna a lista atualizada de todos os Atendimentos no intervalo especificado',
+    description:
+      'Retorna a lista atualizada de todos os Atendimentos no intervalo especificado',
   })
-  @ApiResponse({ status: 200, description: 'Atendimentos listados com sucesso' })
+  @ApiResponse({
+    status: 200,
+    description: 'Atendimentos listados com sucesso',
+  })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @Get('by-date')
   async getAtendimentosByDate(
@@ -101,7 +114,10 @@ export class AtendimentoController {
     description:
       'Altera a data de um Atendimento pelo ID passado por parâmetro',
   })
-  @ApiResponse({ status: 204, description: 'Atendimento atualizado com sucesso' })
+  @ApiResponse({
+    status: 204,
+    description: 'Atendimento atualizado com sucesso',
+  })
   @ApiResponse({ status: 404, description: 'Atendimento não encontrado' })
   @Patch('update-date/:id')
   async updateAtendimentoDate(

@@ -21,7 +21,7 @@ import {
   UpdateProgramaDto,
 } from './programa.dto';
 
-import {ApiOperation, ApiResponse, ApiTags} from '@nestjs/swagger'
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Operações de manutenção de Programas')
 @Controller('programas')
@@ -29,9 +29,12 @@ import {ApiOperation, ApiResponse, ApiTags} from '@nestjs/swagger'
 export class ProgramaController {
   constructor(private readonly programaService: ProgramaService) {}
 
-  @ApiOperation({summary: 'Cadastra um novo Programa', description: 'Cadastra um novo Programa e o grava em banco de dados'})
-  @ApiResponse({status: 201, description: 'Curso criado com sucesso'})
-  @ApiResponse({status: 403, description: 'Permissões insuficientes'})
+  @ApiOperation({
+    summary: 'Cadastra um novo Programa',
+    description: 'Cadastra um novo Programa e o grava em banco de dados',
+  })
+  @ApiResponse({ status: 201, description: 'Curso criado com sucesso' })
+  @ApiResponse({ status: 403, description: 'Permissões insuficientes' })
   @Post()
   async createPrograma(
     @Request() req,
@@ -69,7 +72,6 @@ export class ProgramaController {
     return this.programaService.getProgramaById(id);
   }
 
-  
   @ApiOperation({
     summary: 'Operação de listagem de Programas por NOME',
     description: 'Filtra Programas com base em pesquisa de nome',
@@ -102,8 +104,10 @@ export class ProgramaController {
   }
 
   @ApiOperation({
-    summary: 'Operação de inserção de um Curso relacionado a um Programa em banco de dados por ID',
-    description: 'Atualiza um Programa, atrelando a ele um Curso, pelo ID passado por parâmetro',
+    summary:
+      'Operação de inserção de um Curso relacionado a um Programa em banco de dados por ID',
+    description:
+      'Atualiza um Programa, atrelando a ele um Curso, pelo ID passado por parâmetro',
   })
   @ApiResponse({ status: 204, description: 'Programa atualizado com sucesso' })
   @ApiResponse({ status: 404, description: 'Programa não encontrado' })
@@ -122,7 +126,8 @@ export class ProgramaController {
   }
 
   @ApiOperation({
-    summary: 'Operação de remoção de um Curso relacionado a um Programa do banco de dados por ID',
+    summary:
+      'Operação de remoção de um Curso relacionado a um Programa do banco de dados por ID',
     description:
       'Remove um Curso atrelado a um Programa do banco de dados pelo ID passado por parâmetro',
   })

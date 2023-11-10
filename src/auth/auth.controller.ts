@@ -7,7 +7,6 @@ import {
   SignUpUsuarioDto,
 } from './dto/auth.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Operações de manutenção de Usuários')
 @Controller('auth')
