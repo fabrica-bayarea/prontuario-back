@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { Curso } from '@prisma/client';
 import { CreateCursoDto, UpdateCursoDto } from './curso.dto';
@@ -23,6 +24,14 @@ export class CursoService {
 
     if (!isAdministrator) {
       throw new ForbiddenException('permissões insuficientes.');
+    }
+
+    const repetido = await this.prisma.curso.findUnique({
+      where: { nome: createCursoDto.nome },
+    });
+
+    if (repetido) {
+        throw new BadRequestException('nome do curso deve ser único')
     }
 
     return this.prisma.curso.create({
