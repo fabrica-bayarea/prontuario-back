@@ -21,11 +21,20 @@ import {
   UpdateProgramaDto,
 } from './programa.dto';
 
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+
+@ApiTags('Operações de manutenção de Programas')
 @Controller('programas')
 @UseGuards(JwtGuard)
 export class ProgramaController {
   constructor(private readonly programaService: ProgramaService) {}
 
+  @ApiOperation({
+    summary: 'Cadastra um novo Programa',
+    description: 'Cadastra um novo Programa e o grava em banco de dados',
+  })
+  @ApiResponse({ status: 201, description: 'Curso criado com sucesso' })
+  @ApiResponse({ status: 403, description: 'Permissões insuficientes' })
   @Post()
   async createPrograma(
     @Request() req,
@@ -39,11 +48,23 @@ export class ProgramaController {
     }
   }
 
+  @ApiOperation({
+    summary: 'Operação de listagem de Programas',
+    description: 'Retorna a lista atualizada de todos os Programas',
+  })
+  @ApiResponse({ status: 200, description: 'Programas listados com sucesso' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
   @Get()
   async getAllProgramas(): Promise<Programa[]> {
     return this.programaService.getAllProgramas();
   }
 
+  @ApiOperation({
+    summary: 'Operação de listagem de Programa por ID',
+    description: 'Retorna um Programa pelo ID passado no parâmetro',
+  })
+  @ApiResponse({ status: 200, description: 'Programa listado com sucesso' })
+  @ApiResponse({ status: 404, description: 'Programa não encontrado' })
   @Get('/byid/:id')
   async getProgramaById(
     @Param('id', ParseIntPipe) id: number,
@@ -51,11 +72,23 @@ export class ProgramaController {
     return this.programaService.getProgramaById(id);
   }
 
+  @ApiOperation({
+    summary: 'Operação de listagem de Programas por NOME',
+    description: 'Filtra Programas com base em pesquisa de nome',
+  })
+  @ApiResponse({ status: 200, description: 'Programas listados com sucesso' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
   @Get('pesquisar')
   async getProgramaByName(@Query('nome') nome: string): Promise<Programa[]> {
     return this.programaService.filterProgramasByName(nome);
   }
 
+  @ApiOperation({
+    summary: 'Operação de atualização de Programa do banco de dados por ID',
+    description: 'Atualiza um Programa pelo ID passado por parâmetro',
+  })
+  @ApiResponse({ status: 204, description: 'Programa atualizado com sucesso' })
+  @ApiResponse({ status: 404, description: 'Programa não encontrado' })
   @Put(':id')
   async updatePrograma(
     @Request() req,
@@ -70,6 +103,14 @@ export class ProgramaController {
     );
   }
 
+  @ApiOperation({
+    summary:
+      'Operação de inserção de um Curso relacionado a um Programa em banco de dados por ID',
+    description:
+      'Atualiza um Programa, atrelando a ele um Curso, pelo ID passado por parâmetro',
+  })
+  @ApiResponse({ status: 204, description: 'Programa atualizado com sucesso' })
+  @ApiResponse({ status: 404, description: 'Programa não encontrado' })
   @Patch('/adicionar/:id')
   async adicionarCursoPrograma(
     @Request() req,
@@ -84,6 +125,14 @@ export class ProgramaController {
     );
   }
 
+  @ApiOperation({
+    summary:
+      'Operação de remoção de um Curso relacionado a um Programa do banco de dados por ID',
+    description:
+      'Remove um Curso atrelado a um Programa do banco de dados pelo ID passado por parâmetro',
+  })
+  @ApiResponse({ status: 204, description: 'Curso removido com sucesso' })
+  @ApiResponse({ status: 404, description: 'Curso não encontrado' })
   @Patch('/remover/:id')
   async removerCursoPrograma(
     @Request() req,
@@ -98,6 +147,13 @@ export class ProgramaController {
     );
   }
 
+  @ApiOperation({
+    summary: 'Operação de remoção de um Programa do banco de dados por ID',
+    description:
+      'Remove um Programa do banco de dados pelo ID passado por parâmetro',
+  })
+  @ApiResponse({ status: 204, description: 'Programa removido com sucesso' })
+  @ApiResponse({ status: 404, description: 'Programa não encontrado' })
   @Delete(':id')
   async deletePrograma(
     @Request() req,
