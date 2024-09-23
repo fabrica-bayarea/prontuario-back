@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -18,7 +19,7 @@ export class AtendimentoService {
   constructor(
     private prisma: PrismaService,
     private authService: AuthService,
-  ) {}
+  ) { }
 
   async createAtendimento(
     idUsuario: number,
@@ -53,6 +54,13 @@ export class AtendimentoService {
       throw new NotFoundException(
         `programa com nome ${dto.nomePrograma} não encontrado`,
       );
+    }
+
+    const dataAgenda = new Date(dto.data)
+    const dataAtual = new Date()
+
+    if (dataAgenda.getTime() < dataAtual.getTime()) {
+      throw new BadRequestException('Data inválida! Agende para uma data futura.')
     }
 
     const atendimento = await this.prisma.atendimento.create({
