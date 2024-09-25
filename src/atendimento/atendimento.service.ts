@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -55,9 +56,18 @@ export class AtendimentoService {
       );
     }
 
+    const dataAgenda = new Date(dto.data);
+    const dataAtual = new Date();
+
+    if(dataAgenda.getTime() < dataAtual.getTime()){
+      throw new BadRequestException(
+        'Data inválida! Agende para uma data futura.',
+      );
+    }
+
     const atendimento = await this.prisma.atendimento.create({
       data: {
-        data: new Date(dto.data),
+        data: dataAgenda,
         usuarioId: idUsuario,
         programaId: programa.id,
         beneficiarioId: beneficiario.id,
