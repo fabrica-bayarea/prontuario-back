@@ -48,8 +48,12 @@ export class AuthService {
     try {
       const dadosUsuario: any = {
         nome: dto.nome,
+        sobrenome: dto.sobrenome,
         email: dto.email,
         tipo: dto.tipo,
+        cidade: dto.cidade,
+        cep: dto.cep,
+        endereco: dto.endereco,
         hash: hash,
       };
 
