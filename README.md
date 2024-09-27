@@ -169,4 +169,12 @@ Abaixo temos uma lista de pessoas que participaram deste projeto ao longo dos an
 | ------ | ---- | ------ |
 | pedro.generic.email@gmail.com | Pedro Martins Pereira | Líder Técnico | 
 | alisson.silva.3366@gmail.com | Alisson Silva dos Santos | Engenheiro Backend | 
-| ievsouza622@gmail.com | Iev de Souza Cruz | Engenheiro Backend | 
+| ievsouza622@gmail.com | Iev de Souza Cruz | Engenheiro Backend |
+
+### Equipe 1º/2024 
+
+| E-mail | Nome | Função |
+| ------ | ---- | ------ |
+| arthur.rabel@outlook.com| Arthur Rabelo | Líder Técnico | 
+| jefferson.almeidaalves@gmail.com | Jefferson Almeida | Engenheiro Backend | 
+| georgesdc13@gmail.com | Georges do Carmo Pereira | Engenheiro Backend | 
