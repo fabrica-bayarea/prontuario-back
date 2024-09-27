@@ -1,16 +1,22 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
+export type Turnos = 'Matutino' | 'Vespertino' | 'Noturno' | 'Integral';
+const Turnos: Turnos[] = ['Matutino', 'Vespertino', 'Noturno', 'Integral'];
 export class CreateCursoDto {
   @ApiProperty({ example: 'Ciência da Computação' })
   @IsString()
   @IsNotEmpty()
   nome: string;
 
-  @ApiProperty({ example: 'Matutino, Vespertino, Nortuno ou Integral' })
-  @IsString()
-  @IsNotEmpty()
-  turno: string;
+  @ApiProperty({
+    enum: ['Matutino', 'Vespertino', 'Noturno', 'Integral'],
+    example: 'Matutino',
+  })
+  @IsEnum(Turnos, {
+    message: 'O turno deve ser Matutino, Vespertino, Noturno ou Integral',
+  })
+  turno: Turnos;
 
   @ApiProperty({ example: 'João Silva' })
   @IsString()
@@ -24,10 +30,14 @@ export class UpdateCursoDto {
   @IsNotEmpty()
   nome: string;
 
-  @ApiProperty({ example: 'Matutino, Vespertino, Nortuno ou Integral' })
-  @IsString()
-  @IsNotEmpty()
-  turno: string;
+  @ApiProperty({
+    enum: ['Matutino', 'Vespertino', 'Noturno', 'Integral'],
+    example: 'Matutino',
+  })
+  @IsEnum(Turnos, {
+    message: 'O turno deve ser Matutino, Vespertino, Noturno ou Integral',
+  })
+  turno: Turnos;
 
   @ApiProperty({ example: 'João Silva' })
   @IsString()

@@ -31,7 +31,7 @@ export class CursoService {
     });
 
     if (repetido) {
-      throw new BadRequestException('nome do curso deve ser único')
+      throw new BadRequestException('nome do curso deve ser único');
     }
 
     return this.prisma.curso.create({

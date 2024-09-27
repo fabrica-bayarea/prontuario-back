@@ -9,7 +9,8 @@
   - [Tecnologias](#tecnologias)
 - [Executando o Projeto](#executando-o-projeto)
   - [Dependências](#dependências)
-  - [Rodando localmente](#rodando-localmente)
+  - [Modo produção](#modo-produção)
+  - [Modo desenvolvimento](#modo-desenvolvimento)
 - [Autores](#autores)
   - [Equipe 1º/2023](#equipe-12023)
 
@@ -52,7 +53,42 @@ Antes de começar, certifique-se de ter as seguintes ferramentas instaladas em s
 - Node.js: [Instalação do Node.js](https://nodejs.org/)
 - Docker: [Instalação do Docker](https://docs.docker.com/desktop/install/linux-install/)
 
-## Rodando localmente
+## Modo produção
+
+Clone o projeto:
+
+```bash
+git clone https://github.com/fabrica-bayarea/prontuario-back.git
+```
+
+Navegue para a pasta recém-criada:
+
+```bash
+cd prontuario-back 
+```
+
+Crie um arquivo .env na raíz do projeto e adicione as seguintes variáveis de ambiente:
+
+```env
+DATABASE_URL="postgresql://usuario_postgres:senha_postgres@postgres:5432/db_postgres?schema=public"
+JWT_SECRET="seu segredo"
+POSTGRES_USER=usuario_postgres
+POSTGRES_PASSWORD=senha_postgres
+POSTGRES_DB=db_postgres
+```
+
+Suba o sistema inteiro
+
+```bash
+docker compose up -d
+```
+
+> [!NOTE]  
+> No modo produção não é necessario instalar pacotes ou fazer migração no prisma, todo o sistema está configurado no docker compose!
+
+## Modo desenvolvimento
+
+No modo desenvolvimento sobe apenas o container postgres no docker compose, a api continua local para o desenvolvimento.
 
 Clone o projeto:
 
@@ -74,24 +110,26 @@ npm install
 
 Crie um arquivo .env na raíz do projeto e adicione as seguintes variáveis de ambiente:
 
-```sh
-DATABASE_URL="postgresql://usuario:senha@host:port/nome_do_banco?schema=nome_do_schema"
+```env
+DATABASE_URL="postgresql://usuario_postgres:senha_postgres@localhost:5435/db_postgres?schema=public"
 JWT_SECRET="seu segredo"
 POSTGRES_USER=usuario_postgres
 POSTGRES_PASSWORD=senha_postgres
 POSTGRES_DB=db_postgres
 ```
 
+> [!IMPORTANT]  
+> No modo produção na variavel de ambiente DATABASE_URL o host:port  é `postgres:5432`, mas no modo desenvolvimento deve ser `localhost:5435`
+
 Suba o banco de dados com o docker:
 
-```sh
-docker-compose up -d
-
+```bash
+docker-compose -f docker-compose-dev.yml -d
 ```
 
 Aplique as migrações necessárias:
 
-```sh
+```bash
 npx prisma migrate dev
 ```
 
