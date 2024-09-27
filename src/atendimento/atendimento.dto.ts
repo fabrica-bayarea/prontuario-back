@@ -1,10 +1,4 @@
-import {
-  IsDateString,
-  IsNotEmpty,
-  IsNumberString,
-  IsString,
-  Matches,
-} from 'class-validator';
+import { IsDateString, IsNotEmpty, IsString, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export type AtendimentoResponse = {
@@ -31,7 +25,7 @@ export type AtendimentoResponse = {
 };
 
 export class CreateAtendimentoDto {
-  @ApiProperty({ example: '20/07/2024' })
+  @ApiProperty({ example: '2024-09-01' })
   @IsDateString()
   data: Date;
 
@@ -42,7 +36,7 @@ export class CreateAtendimentoDto {
   })
   cpfBeneficiario: string;
 
-  @ApiProperty({ example: 'Jovens Tecnológicos' })
+  @ApiProperty({ example: 'Jovens conectados' })
   @IsString()
   @IsNotEmpty()
   nomePrograma: string;

@@ -10,17 +10,31 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Turnos {
+  Matutino
+  Vespertino
+  Noturno
+  Integral
+}
+
 // Definição do modelo de Curso
 model Curso {
-  id        Int        @id @default(autoincrement())
-  nome      String     @unique
-  programas Programa[]
+  id          Int        @id @default(autoincrement())
+  nome        String     @unique
+  turno       Turnos
+  coordenador String
+  programas   Programa[]
 }
 
 // Definição do modelo de Programa Social
 model Programa {
   id           Int           @id @default(autoincrement())
   nome         String        @unique
+  descricao    String
+  inicio       DateTime
+  termino      DateTime
+  horario      String
+  publicoAlvo  String
   cursos       Curso[]
   atendimentos Atendimento[]
 }
@@ -34,8 +48,12 @@ enum TipoUsuario {
 model Usuario {
   id           Int           @id @default(autoincrement())
   nome         String
+  sobrenome    String
   email        String        @unique
   telefone     String?       @unique
+  cidade       String
+  cep          String 
+  endereco     String 
   hash         String
   tipo         TipoUsuario
   atendimentos Atendimento[] // Atendimentos criados pelo usuário

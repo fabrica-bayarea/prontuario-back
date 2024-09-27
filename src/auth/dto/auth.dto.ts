@@ -17,10 +17,15 @@ export const TiposDeUsuario: TipoDeUsuario[] = ['ADMINISTRADOR', 'CADASTRADOR'];
 export const TiposDeBeneficiario: TipoDeBeneficiario[] = ['BENEFICIARIO'];
 
 export class SignUpUsuarioDto {
-  @ApiProperty({ example: 'Cleber Guimarães' })
+  @ApiProperty({ example: 'Cleber' })
   @IsNotEmpty({ message: 'nome não deve ser omitido' })
   @IsString({ message: 'nome deve ser uma string' })
   nome: string;
+
+  @ApiProperty({ example: 'Guimarães' })
+  @IsNotEmpty({ message: 'sobrenome não deve ser omitido' })
+  @IsString({ message: 'nome deve ser uma string' })
+  sobrenome: string;
 
   @ApiProperty({ example: 'cleber.guimaraes@email.com' })
   @IsEmail({}, { message: 'email deve ser um email válido' })
@@ -34,6 +39,18 @@ export class SignUpUsuarioDto {
     message: 'telefone deve ter o formato <CODIGO_DO_PAIS><DDD>xxxxxxxx',
   })
   telefone: string;
+
+  @ApiProperty({ example: 'brasilia' })
+  @IsString({ message: 'nome da cidade deve ser uma string' })
+  cidade: string;
+
+  @ApiProperty({ example: '00000-00' })
+  @IsString({ message: 'cep deve ser uma string' })
+  cep: string;
+
+  @ApiProperty({ example: 'Rua Exemplo, casa 123, Bairro' })
+  @IsString({ message: 'endereço deve ser uma string' })
+  endereco: string;
 
   @ApiProperty({
     enum: ['ADMINISTRADOR', 'CADASTRADOR'],
