@@ -1,6 +1,6 @@
 services:
   postgres-dev:
-    image: 'postgres:14.5'
+    image: 'postgres:16.3'
     container_name: prontario-dev-postgres
     restart: always
     env_file:
