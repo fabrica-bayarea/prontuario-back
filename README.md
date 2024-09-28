@@ -124,7 +124,7 @@ POSTGRES_DB=db_postgres
 Suba o banco de dados com o docker:
 
 ```bash
-docker-compose -f docker-compose-dev.yml -d
+docker compose -f docker-compose-dev.yml up -d
 ```
 
 Aplique as migrações necessárias:
