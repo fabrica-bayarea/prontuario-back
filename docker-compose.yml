@@ -1,11 +1,13 @@
+version: '3.8'
 services:
   postgres:
-    image: 'postgres:14.5'
-    container_name: prontario-postgres
+    image: 'postgres:16.3'
+    container_name: prontuario-postgres
     restart: always
     env_file:
       - .env
     logging:
+      driver: "json-file"
       options:
         max-size: 10m
         max-file: "3"
@@ -14,7 +16,7 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB} -h localhost"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} -h postgres"]
       interval: 2s
       timeout: 3s
       retries: 5  
@@ -23,12 +25,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: prontario-api
+    container_name: prontuario-api
     command: ["sh", "-c", "npx prisma migrate deploy && npm run build && npm run start:prod"]
     restart: always
     env_file:
       - .env
     logging:
+      driver: "json-file"
       options:
         max-size: 10m
         max-file: "3"
@@ -40,10 +43,10 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:3000/"]
-      interval: 30s
-      timeout: 5s
-      retries: 3 
+      test: ["CMD-SHELL", "curl -f http://api:3000/"]
+      interval: 15s
+      timeout: 3s
+      retries: 5 
       start_period: 30s 
 
 networks:
