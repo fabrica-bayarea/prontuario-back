@@ -32,7 +32,7 @@ export class AtendimentoService {
       throw new ForbiddenException('credenciais inválidas');
     }
 
-    const beneficiario = await this.prisma.beneficiario.findUnique({
+    const beneficiario = await this.prisma.usuario.findUnique({
       where: {
         cpf: dto.cpfBeneficiario,
       },
@@ -59,7 +59,7 @@ export class AtendimentoService {
     const dataAgenda = new Date(dto.data);
     const dataAtual = new Date();
 
-    if(dataAgenda.getTime() < dataAtual.getTime()){
+    if (dataAgenda.getTime() < dataAtual.getTime()) {
       throw new BadRequestException(
         'Data inválida! Agende para uma data futura.',
       );
@@ -92,7 +92,9 @@ export class AtendimentoService {
         usuario: {
           id: idUsuario,
           nome: usuario.nome,
+          cpf: usuario.cpf,
           email: usuario.email,
+          telefone: usuario.telefone,
         },
       },
     };
@@ -127,7 +129,9 @@ export class AtendimentoService {
         usuario: {
           id: atendimento.usuario.id,
           nome: atendimento.usuario.nome,
+          cpf: atendimento.usuario.cpf,
           email: atendimento.usuario.email,
+          telefone: atendimento.usuario.telefone,
         },
       },
     }));
@@ -136,7 +140,7 @@ export class AtendimentoService {
   async getAtendimentosByBeneficiarioCpf(
     dto: GetAtendimentoByCpfDto,
   ): Promise<AtendimentoResponse[]> {
-    const beneficiario = await this.prisma.beneficiario.findUnique({
+    const beneficiario = await this.prisma.usuario.findUnique({
       where: { cpf: dto.cpfBeneficiario },
     });
 
@@ -173,7 +177,9 @@ export class AtendimentoService {
         usuario: {
           id: atendimento.usuario.id,
           nome: atendimento.usuario.nome,
+          cpf: atendimento.usuario.cpf,
           email: atendimento.usuario.email,
+          telefone: atendimento.usuario.telefone,
         },
       },
     }));
@@ -232,7 +238,9 @@ export class AtendimentoService {
         usuario: {
           id: atendimento.usuario.id,
           nome: atendimento.usuario.nome,
+          cpf: atendimento.usuario.cpf,
           email: atendimento.usuario.email,
+          telefone: atendimento.usuario.telefone,
         },
       },
     }));
@@ -280,7 +288,9 @@ export class AtendimentoService {
         usuario: {
           id: updatedAtendimento.usuario.id,
           nome: updatedAtendimento.usuario.nome,
+          cpf: updatedAtendimento.usuario.cpf,
           email: updatedAtendimento.usuario.email,
+          telefone: updatedAtendimento.usuario.telefone,
         },
       },
     };
