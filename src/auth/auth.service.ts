@@ -40,40 +40,56 @@ export class AuthService {
   ): Promise<{ access_token: string } | never> {
     const hash = await argon.hash(dto.senha);
     try {
-      const dadosUsuario: any = {
-        nome: dto.nome,
-        sobrenome: dto.sobrenome,
-        email: dto.email,
-        cpf: dto.cpf,
-        tipo: dto.tipo,
-        cidade: dto.cidade,
-        cep: dto.cep,
-        endereco: dto.endereco,
-        hash: hash,
-      };
+      const response = await this.prisma.$transaction(async prisma => {
+        const existingUser = await prisma.usuario.findFirst({
+          where: {
+            OR: [{ email: dto.email }, { cpf: dto.cpf }],
+          },
+        });
 
-      if (dto.telefone) {
-        dadosUsuario.telefone = dto.telefone;
-      }
+        if (existingUser) {
+          throw new ForbiddenException('Credenciais tomadas');
+        }
 
-      const usuario = await this.prisma.usuario.create({
-        data: dadosUsuario,
+        const hasAdmin = await prisma.usuario.findUnique({
+          where: { id: 1 },
+        });
+
+        const dadosUsuario: any = {
+          nome: dto.nome,
+          sobrenome: dto.sobrenome,
+          email: dto.email,
+          cpf: dto.cpf,
+          tipo: !hasAdmin ? 'ADMINISTRADOR' : 'BENEFICIARIO',
+          cidade: dto.cidade,
+          cep: dto.cep,
+          endereco: dto.endereco,
+          hash: hash,
+        };
+
+        if (dto.telefone) {
+          dadosUsuario.telefone = dto.telefone;
+        }
+
+        const usuario = await prisma.usuario.create({
+          data: dadosUsuario,
+        });
+
+        delete usuario.hash;
+
+        const { access_token } = await this.signToken(usuario.id, usuario.tipo);
+        return {
+          access_token,
+          usuario: {
+            id: usuario.id,
+            nome: usuario.nome,
+            sobrenome: usuario.sobrenome,
+            cpf: usuario.cpf,
+            email: usuario.email,
+            tipo: usuario.tipo,
+          },
+        };
       });
-
-      delete usuario.hash;
-
-      const { access_token } = await this.signToken(usuario.id, usuario.tipo);
-      const response = {
-        access_token,
-        usuario: {
-          id: usuario.id,
-          nome: usuario.nome,
-          sobrenome: usuario.sobrenome,
-          cpf: usuario.cpf,
-          email: usuario.email,
-          tipo: usuario.tipo,
-        },
-      };
 
       return response;
     } catch (err) {

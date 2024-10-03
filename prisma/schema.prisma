@@ -50,9 +50,9 @@ model Usuario {
   id           Int           @id @default(autoincrement())
   nome         String
   sobrenome    String
-  cpf          String        @unique
-  email        String        @unique
-  telefone     String?       @unique
+  cpf          String?       @unique
+  email        String?       @unique
+  telefone     String        @unique
   cidade       String
   cep          String 
   endereco     String 

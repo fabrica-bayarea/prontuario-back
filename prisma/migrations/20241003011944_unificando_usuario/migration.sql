@@ -3,7 +3,7 @@
 
   - You are about to drop the `Beneficiario` table. If the table is not empty, all the data it contains will be lost.
   - A unique constraint covering the columns `[cpf]` on the table `Usuario` will be added. If there are existing duplicate values, this will fail.
-  - Added the required column `cpf` to the `Usuario` table without a default value. This is not possible if the table is not empty.
+  - Made the column `telefone` on table `Usuario` required. This step will fail if there are existing NULL values in that column.
 
 */
 -- AlterEnum
@@ -13,7 +13,9 @@ ALTER TYPE "TipoUsuario" ADD VALUE 'BENEFICIARIO';
 ALTER TABLE "Atendimento" DROP CONSTRAINT "Atendimento_beneficiarioId_fkey";
 
 -- AlterTable
-ALTER TABLE "Usuario" ADD COLUMN     "cpf" TEXT NOT NULL;
+ALTER TABLE "Usuario" ADD COLUMN     "cpf" TEXT,
+ALTER COLUMN "email" DROP NOT NULL,
+ALTER COLUMN "telefone" SET NOT NULL;
 
 -- DropTable
 DROP TABLE "Beneficiario";

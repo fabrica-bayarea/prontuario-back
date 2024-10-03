@@ -1,6 +1,5 @@
 import {
   IsEmail,
-  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsPhoneNumber,
@@ -60,15 +59,6 @@ export class SignUpUsuarioDto {
   @ApiProperty({ example: 'Rua Exemplo, casa 123, Bairro' })
   @IsString({ message: 'endereço deve ser uma string' })
   endereco: string;
-
-  @ApiProperty({
-    enum: ['ADMINISTRADOR', 'BENEFICIARIO', 'CADASTRADOR'],
-    example: 'ADMINISTRADOR',
-  })
-  @IsEnum(TiposDeUsuario, {
-    message: 'tipo deve ser ADMINISTRADOR ou CADASTRADOR',
-  })
-  tipo: TipoDeUsuario;
 
   @ApiProperty({ example: 'Senha123!' })
   @IsStrongPassword(
