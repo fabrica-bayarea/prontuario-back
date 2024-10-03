@@ -1,7 +1,7 @@
 services:
   postgres-dev:
     image: 'postgres:16.3'
-    container_name: prontario-dev-postgres
+    container_name: prontuario-dev-postgres
     restart: always
     env_file:
       - .env
