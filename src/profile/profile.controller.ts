@@ -1,10 +1,12 @@
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger"
 import { ProfileService } from "./profile.service"
-import { Controller, Get, Param, ParseIntPipe } from "@nestjs/common";
+import { Controller, Get, Param, ParseIntPipe, UseGuards } from "@nestjs/common";
 import { Usuario } from "@prisma/client";
+import { JwtGuard } from "src/auth/guard/jwt.guard";
 
 @ApiTags('Operações de manutenção de perfil de usuário')
 @Controller('profiles')
+@UseGuards(JwtGuard)
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
