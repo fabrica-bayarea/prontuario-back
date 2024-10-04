@@ -18,9 +18,4 @@ export class ProfileController {
   async getUserProfile(@Param('id', ParseIntPipe) id: number): Promise<Usuario> {
     return this.profileService.getUserProfile(id);
   }
-
-  @Get()
-  async returnString(){
-    return 'Hello Georges!'
-  }
 }
