@@ -6,15 +6,10 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
-import {
-  SignInUsuarioDto,
-  SignUpUsuarioDto,
-  SignInBeneficiarioDto,
-  SignUpBeneficiarioDto,
-} from './dto/auth.dto';
+import { SignInUsuarioDto, SignUpUsuarioDto } from './dto/auth.dto';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import * as argon from 'argon2';
-import { Beneficiario } from '@prisma/client';
+import { Usuario } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -35,10 +30,9 @@ export class AuthService {
 
     const token = await this.jwt.signAsync(payload, {
       secret: this.config.get('JWT_SECRET'),
+      expiresIn: '2h',
     });
-    return {
-      access_token: token,
-    };
+    return { access_token: token };
   }
 
   async signUpUsuario(
@@ -46,60 +40,58 @@ export class AuthService {
   ): Promise<{ access_token: string } | never> {
     const hash = await argon.hash(dto.senha);
     try {
-      const dadosUsuario: any = {
-        nome: dto.nome,
-        sobrenome: dto.sobrenome,
-        email: dto.email,
-        tipo: dto.tipo,
-        cidade: dto.cidade,
-        cep: dto.cep,
-        endereco: dto.endereco,
-        hash: hash,
-      };
+      const response = await this.prisma.$transaction(async prisma => {
+        const existingUser = await prisma.usuario.findFirst({
+          where: {
+            OR: [{ email: dto.email }, { cpf: dto.cpf }],
+          },
+        });
 
-      if (dto.telefone) {
-        dadosUsuario.telefone = dto.telefone;
-      }
-
-      const usuario = await this.prisma.usuario.create({
-        data: dadosUsuario,
-      });
-
-      delete usuario.hash;
-      return this.signToken(usuario.id, usuario.tipo);
-    } catch (err) {
-      if (err instanceof PrismaClientKnownRequestError) {
-        if (err.code === 'P2002') {
+        if (existingUser) {
           throw new ForbiddenException('Credenciais tomadas');
         }
-      }
-      throw err;
-    }
-  }
 
-  async signUpBeneficiario(
-    dto: SignUpBeneficiarioDto,
-  ): Promise<{ access_token: string } | never> {
-    const hash = await argon.hash(dto.senha);
-    try {
-      const dadosBeneficiario: any = {
-        nome: dto.nome,
-        cpf: dto.cpf,
-        email: dto.email,
-        telefone: dto.telefone,
-        tipo: dto.tipo,
-        hash: hash,
-      };
-      if (dto.telefone) {
-        dadosBeneficiario.telefone = dto.telefone;
-      }
+        const hasAdmin = await prisma.usuario.findUnique({
+          where: { id: 1 },
+        });
 
-      const beneficiario = await this.prisma.beneficiario.create({
-        data: dadosBeneficiario,
+        const dadosUsuario: any = {
+          nome: dto.nome,
+          sobrenome: dto.sobrenome,
+          email: dto.email,
+          cpf: dto.cpf,
+          tipo: !hasAdmin ? 'ADMINISTRADOR' : 'BENEFICIARIO',
+          cidade: dto.cidade,
+          cep: dto.cep,
+          endereco: dto.endereco,
+          hash: hash,
+        };
+
+        if (dto.telefone) {
+          dadosUsuario.telefone = dto.telefone;
+        }
+
+        const usuario = await prisma.usuario.create({
+          data: dadosUsuario,
+        });
+
+        delete usuario.hash;
+
+        const { access_token } = await this.signToken(usuario.id, usuario.tipo);
+        return {
+          access_token,
+          usuario: {
+            id: usuario.id,
+            nome: usuario.nome,
+            sobrenome: usuario.sobrenome,
+            cpf: usuario.cpf,
+            email: usuario.email,
+            tipo: usuario.tipo,
+          },
+        };
       });
 
-      delete beneficiario.hash;
-      return this.signToken(beneficiario.id, beneficiario.tipo);
+      return response;
     } catch (err) {
       if (err instanceof PrismaClientKnownRequestError) {
         if (err.code === 'P2002') {
@@ -112,49 +104,42 @@ export class AuthService {
 
   async signInUsuario(
     dto: SignInUsuarioDto,
-  ): Promise<{ access_token: string } | never> {
-    const usuario = await this.prisma.usuario.findUnique({
-      where: { email: dto.email },
-    });
+  ): Promise<{ access_token: string; usuario: any } | never> {
+    if (!dto.cpf && !dto.email) {
+      throw new BadRequestException('É necessário fornecer CPF ou email.');
+    }
+
+    let usuario: Usuario;
+
+    if (dto.cpf) {
+      usuario = await this.prisma.usuario.findUnique({
+        where: { cpf: dto.cpf },
+      });
+    } else if (dto.email) {
+      usuario = await this.prisma.usuario.findUnique({
+        where: { email: dto.email },
+      });
+    }
 
     if (!usuario) throw new ForbiddenException('Credenciais inválidas');
 
     const senhaCorreta = await argon.verify(usuario.hash, dto.senha);
 
     if (!senhaCorreta) throw new ForbiddenException('Credenciais incorretas');
-    return this.signToken(usuario.id, usuario.tipo);
-  }
 
-  async signInBeneficiario(
-    dto: SignInBeneficiarioDto,
-  ): Promise<{ access_token: string } | never> {
-    if (!dto.cpf && !dto.email) {
-      throw new BadRequestException('É necessário fornecer CPF ou email.');
-    }
-
-    let beneficiario: Beneficiario;
-
-    if (dto.cpf) {
-      beneficiario = await this.prisma.beneficiario.findUnique({
-        where: { cpf: dto.cpf },
-      });
-    } else if (dto.email) {
-      beneficiario = await this.prisma.beneficiario.findUnique({
-        where: { email: dto.email },
-      });
-    }
-
-    if (!beneficiario) {
-      throw new ForbiddenException('Credenciais inválidas');
-    }
-
-    const senhaCorreta = await argon.verify(beneficiario.hash, dto.senha);
-
-    if (!senhaCorreta) {
-      throw new ForbiddenException('Credenciais incorretas');
-    }
-
-    return this.signToken(beneficiario.id, beneficiario.tipo);
+    const { access_token } = await this.signToken(usuario.id, usuario.tipo);
+    const response = {
+      access_token,
+      usuario: {
+        id: usuario.id,
+        nome: usuario.nome,
+        sobrenome: usuario.sobrenome,
+        cpf: usuario.cpf,
+        email: usuario.email,
+        tipo: usuario.tipo,
+      },
+    };
+    return response;
   }
 
   async isAdministrator(idUsuario: number): Promise<boolean> {
@@ -163,6 +148,14 @@ export class AuthService {
     });
 
     return usuario?.tipo === 'ADMINISTRADOR';
+  }
+
+  async isBeneficiario(idUsuario: number): Promise<boolean> {
+    const usuario = await this.prisma.usuario.findUnique({
+      where: { id: idUsuario },
+    });
+
+    return usuario?.tipo === 'BENEFICIARIO';
   }
 
   async isCadastrador(idUsuario: number): Promise<boolean> {

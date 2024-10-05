@@ -41,6 +41,7 @@ model Programa {
 
 enum TipoUsuario {
   ADMINISTRADOR
+  BENEFICIARIO
   CADASTRADOR
 }
 
@@ -49,6 +50,7 @@ model Usuario {
   id           Int           @id @default(autoincrement())
   nome         String
   sobrenome    String
+  cpf          String        @unique
   email        String        @unique
   telefone     String?       @unique
   cidade       String
@@ -56,32 +58,17 @@ model Usuario {
   endereco     String 
   hash         String
   tipo         TipoUsuario
-  atendimentos Atendimento[] // Atendimentos criados pelo usuário
-}
-
-enum TipoBeneficiario {
-  BENEFICIARIO
-}
-
-// Definição do modelo de Beneficiário
-model Beneficiario {
-  id          Int              @id @default(autoincrement())
-  nome        String
-  cpf         String           @unique
-  email       String           @unique
-  telefone    String           @unique
-  tipo        TipoBeneficiario
-  hash        String
-  Atendimento Atendimento[]
+  atendimentos Atendimento[] @relation("UsuarioAtendimentos")
+  beneficiarioAtendimentos Atendimento[] @relation("BeneficiadorAtendimentos")
 }
 
 // Definição do modelo de Atendimento
 model Atendimento {
   id             Int          @id @default(autoincrement())
   data           DateTime
-  beneficiario   Beneficiario @relation(fields: [beneficiarioId], references: [id])
+  beneficiario   Usuario      @relation("BeneficiadorAtendimentos", fields: [beneficiarioId], references: [id])
   beneficiarioId Int
-  usuario        Usuario      @relation(fields: [usuarioId], references: [id])
+  usuario        Usuario      @relation("UsuarioAtendimentos", fields: [usuarioId], references: [id])
   usuarioId      Int
   programa       Programa     @relation(fields: [programaId], references: [id])
   programaId     Int
