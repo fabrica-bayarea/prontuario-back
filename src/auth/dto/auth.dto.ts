@@ -72,7 +72,6 @@ export class SignUpUsuarioDto {
 }
 
 export class SignInUsuarioDto {
-  @ApiProperty({ example: '987.654.321-25' })
   @IsString()
   @Matches(/^[0-9]{3}\.[0-9]{3}\.[0-9]{3}\-[0-9]{2}$/, {
     message:
