@@ -59,7 +59,7 @@ export class AtendimentoService {
     const dataAgenda = new Date(dto.data);
     const dataAtual = new Date();
 
-    if(dataAgenda.getTime() < dataAtual.getTime()){
+    if (dataAgenda.getTime() < dataAtual.getTime()) {
       throw new BadRequestException(
         'Data inválida! Agende para uma data futura.',
       );

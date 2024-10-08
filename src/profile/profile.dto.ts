@@ -50,25 +50,25 @@ export class UpdateProfileDto {
     @IsString({ message: 'endereço deve ser uma string' })
     endereco: string;
 
-/*    @ApiProperty({
-        enum: ['ADMINISTRADOR', 'CADASTRADOR'],
-        example: 'ADMINISTRADOR',
-    })
-    @IsEnum(TiposDeUsuario, {
-        message: 'tipo deve ser ADMINISTRADOR ou CADASTRADOR',
-    })
-    tipo: TipoDeUsuario;
-*/
-/*    @ApiProperty({ example: 'Senha123!' })
-    @IsStrongPassword(
-        {},
-        {
-            message:
-                'senha deve conter no mínimo 8 caracteres, 1 letra mínuscula, 1 maíusucula, 1 número e 1 caractere especial',
-        },
-    )
-    senha: string;
-    */
+    /*    @ApiProperty({
+          enum: ['ADMINISTRADOR', 'CADASTRADOR'],
+          example: 'ADMINISTRADOR',
+      })
+      @IsEnum(TiposDeUsuario, {
+          message: 'tipo deve ser ADMINISTRADOR ou CADASTRADOR',
+      })
+      tipo: TipoDeUsuario;
+  */
+    /*    @ApiProperty({ example: 'Senha123!' })
+      @IsStrongPassword(
+          {},
+          {
+              message:
+                  'senha deve conter no mínimo 8 caracteres, 1 letra mínuscula, 1 maíusucula, 1 número e 1 caractere especial',
+          },
+      )
+      senha: string;
+      */
 }
 
 export class ProfileDto {

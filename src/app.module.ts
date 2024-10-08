@@ -17,10 +17,9 @@ import { ProfileModule } from './profile/profile.module';
     ProfileModule,
     CursoModule,
     ProgramaModule,
-    AtendimentoModule
+    AtendimentoModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
-

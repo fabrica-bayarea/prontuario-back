@@ -4,15 +4,11 @@ import { ProfileDto, UpdateProfileDto } from './profile.dto';
 
 @Injectable()
 export class ProfileService {
-    constructor(
-        private prisma: PrismaService,
-    ) { }
+    constructor(private prisma: PrismaService) { }
 
-    async getUserProfile(
-        id: number
-    ): Promise<ProfileDto> {
+    async getUserProfile(id: number): Promise<ProfileDto> {
         const userProfile = await this.prisma.usuario.findUnique({
-            where: { id: id }
+            where: { id: id },
         });
 
         const userData = {
@@ -23,8 +19,8 @@ export class ProfileService {
             cidade: userProfile.cidade,
             cep: userProfile.cep,
             endereco: userProfile.endereco,
-            tipo: userProfile.tipo
-        }
+            tipo: userProfile.tipo,
+        };
 
         if (!userProfile) {
             throw new Error(`Usuário com ID ${id} não encontrado.`);
@@ -37,7 +33,7 @@ export class ProfileService {
         updateProfileDto: UpdateProfileDto,
     ): Promise<UpdateProfileDto> {
         const userProfile = await this.prisma.usuario.findUnique({
-            where: { id: id }
+            where: { id: id },
         });
         if (!userProfile) {
             throw new Error(`Usuário com ID ${id} não encontrado.`);
@@ -50,8 +46,8 @@ export class ProfileService {
             telefone: updateProfileDto.telefone,
             cidade: updateProfileDto.cidade,
             endereco: updateProfileDto.endereco,
-            cep: updateProfileDto.cep
-        }
+            cep: updateProfileDto.cep,
+        };
 
         this.prisma.usuario.update({
             where: { id },
@@ -62,8 +58,8 @@ export class ProfileService {
                 telefone: userData.telefone,
                 cidade: userData.cidade,
                 endereco: userData.endereco,
-                cep: userData.cep
-            }
+                cep: userData.cep,
+            },
         });
         return userData;
     }
