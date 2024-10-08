@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { Usuario } from '@prisma/client';
-import { UpdateCursoDto } from 'src/curso/curso.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { UpdateProfileDto } from './profile.dto';
+import { ProfileDto, UpdateProfileDto } from './profile.dto';
 
 @Injectable()
 export class ProfileService {
@@ -10,39 +8,63 @@ export class ProfileService {
         private prisma: PrismaService,
     ) { }
 
-    async getUserProfile(id: number): Promise<Usuario> {
+    async getUserProfile(
+        id: number
+    ): Promise<ProfileDto> {
         const userProfile = await this.prisma.usuario.findUnique({
             where: { id: id }
         });
 
+        const userData = {
+            nome: userProfile.nome,
+            sobrenome: userProfile.sobrenome,
+            email: userProfile.email,
+            telefone: userProfile.telefone,
+            cidade: userProfile.cidade,
+            cep: userProfile.cep,
+            endereco: userProfile.endereco,
+            tipo: userProfile.tipo
+        }
+
         if (!userProfile) {
             throw new Error(`Usuário com ID ${id} não encontrado.`);
         }
-        return userProfile;
+        return userData;
     }
 
     async updateUserProfile(
         id: number,
         updateProfileDto: UpdateProfileDto,
-        ): Promise<Usuario> {
+    ): Promise<UpdateProfileDto> {
         const userProfile = await this.prisma.usuario.findUnique({
             where: { id: id }
         });
         if (!userProfile) {
             throw new Error(`Usuário com ID ${id} não encontrado.`);
         }
-        return this.prisma.usuario.update({
+
+        const userData = {
+            nome: updateProfileDto.nome,
+            sobrenome: updateProfileDto.sobrenome,
+            email: updateProfileDto.email,
+            telefone: updateProfileDto.telefone,
+            cidade: updateProfileDto.cidade,
+            endereco: updateProfileDto.endereco,
+            cep: updateProfileDto.cep
+        }
+
+        this.prisma.usuario.update({
             where: { id },
             data: {
-                nome: updateProfileDto.nome,
-                sobrenome: updateProfileDto.sobrenome,
-                email: updateProfileDto.email,
-                telefone: updateProfileDto.telefone,
-                cidade: updateProfileDto.cidade,
-                endereco: updateProfileDto.endereco,
-                cep: updateProfileDto.cep,
-                tipo: updateProfileDto.tipo,                
+                nome: userData.nome,
+                sobrenome: userData.sobrenome,
+                email: userData.email,
+                telefone: userData.telefone,
+                cidade: userData.cidade,
+                endereco: userData.endereco,
+                cep: userData.cep
             }
         });
+        return userData;
     }
 }

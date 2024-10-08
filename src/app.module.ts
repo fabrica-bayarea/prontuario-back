@@ -14,10 +14,10 @@ import { ProfileModule } from './profile/profile.module';
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     AuthModule,
+    ProfileModule,
     CursoModule,
     ProgramaModule,
-    AtendimentoModule,
-    ProfileModule,
+    AtendimentoModule
   ],
   controllers: [AppController],
   providers: [AppService],
