@@ -171,7 +171,7 @@ Abaixo temos uma lista de pessoas que participaram deste projeto ao longo dos an
 | alisson.silva.3366@gmail.com | Alisson Silva dos Santos | Engenheiro Backend | 
 | ievsouza622@gmail.com | Iev de Souza Cruz | Engenheiro Backend |
 
-### Equipe 1º/2024 
+### Equipe 2º/2024 
 
 | E-mail | Nome | Função |
 | ------ | ---- | ------ |
