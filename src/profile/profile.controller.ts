@@ -5,10 +5,10 @@ import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { ProfileDto, UpdateProfileDto } from './profile.dto';
 
 @ApiTags('Operações de manutenção de perfil de usuário')
-@Controller('profiles')
+@Controller('profile')
 @UseGuards(JwtGuard)
 export class ProfileController {
-  constructor(private readonly profileService: ProfileService) { }
+  constructor(private readonly profileService: ProfileService) {}
 
   @ApiOperation({
     summary: 'Operação de listagem de informações de usuário logado',
