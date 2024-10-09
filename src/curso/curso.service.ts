@@ -75,6 +75,9 @@ export class CursoService {
   async getCursoById(id: number): Promise<Curso> {
     const curso = await this.prisma.curso.findUnique({
       where: { id },
+      include: {
+        programas: true,
+      },
     });
 
     if (!curso) {
