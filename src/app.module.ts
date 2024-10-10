@@ -7,12 +7,14 @@ import { PrismaModule } from './prisma/prisma.module';
 import { CursoModule } from './curso/curso.module';
 import { ProgramaModule } from './programa/programa.module';
 import { AtendimentoModule } from './atendimento/atendimento.module';
+import { ProfileModule } from './profile/profile.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     AuthModule,
+    ProfileModule,
     CursoModule,
     ProgramaModule,
     AtendimentoModule,
@@ -21,4 +23,3 @@ import { AtendimentoModule } from './atendimento/atendimento.module';
   providers: [AppService],
 })
 export class AppModule {}
-
