@@ -31,7 +31,8 @@ export class ProgramaService {
       throw new ForbiddenException('permissões insuficientes.');
     }
 
-    const { nome, curso } = createProgramaDto;
+    const { nome, curso, descricao, inicio, termino, horario, publicoAlvo } =
+      createProgramaDto;
     let exists: any;
 
     if (isString(curso)) {
@@ -42,7 +43,15 @@ export class ProgramaService {
       }
 
       return await this.prisma.programa.create({
-        data: { nome, cursos: { connect: [{ nome: curso }] } },
+        data: {
+          nome,
+          descricao,
+          inicio,
+          termino,
+          horario,
+          publicoAlvo,
+          cursos: { connect: [{ nome: curso }] },
+        },
       });
     } else if (isInt(curso)) {
       exists = await this.prisma.curso.findUnique({ where: { id: curso } });
@@ -52,7 +61,15 @@ export class ProgramaService {
       }
 
       return await this.prisma.programa.create({
-        data: { nome, cursos: { connect: [{ id: curso }] } },
+        data: {
+          nome,
+          descricao,
+          inicio,
+          termino,
+          horario,
+          publicoAlvo,
+          cursos: { connect: [{ id: curso }] },
+        },
       });
     }
   }

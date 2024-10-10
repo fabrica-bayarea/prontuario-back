@@ -20,7 +20,6 @@ async function bootstrap() {
       'Documentação da API do Sistema de Prontuários do Núcleo Social IESB',
     )
     .setVersion('1.0')
-    .addTag('Prontuário')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document, {

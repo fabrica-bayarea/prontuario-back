@@ -31,12 +31,14 @@ export class CursoService {
     });
 
     if (repetido) {
-        throw new BadRequestException('nome do curso deve ser único')
+      throw new BadRequestException('nome do curso deve ser único');
     }
 
     return this.prisma.curso.create({
       data: {
         nome: createCursoDto.nome,
+        turno: createCursoDto.turno,
+        coordenador: createCursoDto.coordenador,
       },
     });
   }
@@ -64,6 +66,8 @@ export class CursoService {
       where: { id },
       data: {
         nome: updateCursoDto.nome,
+        turno: updateCursoDto.turno,
+        coordenador: updateCursoDto.coordenador,
       },
     });
   }
@@ -71,6 +75,9 @@ export class CursoService {
   async getCursoById(id: number): Promise<Curso> {
     const curso = await this.prisma.curso.findUnique({
       where: { id },
+      include: {
+        programas: true,
+      },
     });
 
     if (!curso) {

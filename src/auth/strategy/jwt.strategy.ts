@@ -3,7 +3,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Beneficiario, Usuario } from '@prisma/client';
+import { Usuario } from '@prisma/client';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -21,14 +21,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: {
     sub: number;
     tipo: 'ADMINISTRADOR' | 'CADASTRADOR' | 'BENEFICIARIO';
-  }): Promise<Usuario | Beneficiario> {
+  }): Promise<Usuario> {
     if (
       !['ADMINISTRADOR', 'CADASTRADOR', 'BENEFICIARIO'].includes(payload.tipo)
     ) {
       throw new UnauthorizedException('Tipo de usuário inválido');
     }
 
-    let usuario: Usuario | Beneficiario;
+    let usuario: Usuario;
     try {
       switch (payload.tipo) {
         case 'ADMINISTRADOR':
@@ -46,7 +46,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
           });
           break;
         case 'BENEFICIARIO':
-          usuario = await this.prisma.beneficiario.findUnique({
+          usuario = await this.prisma.usuario.findUnique({
             where: {
               id: payload.sub,
             },
