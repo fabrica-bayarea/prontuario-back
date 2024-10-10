@@ -14,7 +14,7 @@ import {
 import { CursoService } from './curso.service';
 import { Curso } from '@prisma/client';
 import { CreateCursoDto, UpdateCursoDto } from './curso.dto';
-import { JwtGuard } from 'src/auth/guard/jwt.guard';
+import { JwtGuard } from '../auth/guard/jwt.guard';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Operações de manutenção de Cursos')

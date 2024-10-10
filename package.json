@@ -30,6 +30,7 @@
     "@nestjs/swagger": "^7.1.14",
     "@prisma/client": "^5.4.2",
     "argon2": "^0.31.1",
+    "backend-prontuario": "file:",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "passport": "^0.6.0",

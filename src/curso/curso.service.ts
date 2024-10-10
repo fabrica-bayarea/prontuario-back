@@ -6,8 +6,8 @@ import {
 } from '@nestjs/common';
 import { Curso } from '@prisma/client';
 import { CreateCursoDto, UpdateCursoDto } from './curso.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { AuthService } from 'src/auth/auth.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class CursoService {
