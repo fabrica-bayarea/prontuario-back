@@ -90,3 +90,19 @@ export class SignInUsuarioDto {
   @IsString({ message: 'senha deve ser uma string' })
   senha: string;
 }
+export class PasswordDto {
+  @ApiProperty({ example: 'Senha123!' })
+  @IsNotEmpty({ message: 'senha não pode ser omitida' })
+  @IsString({ message: 'senha deve ser uma string' })
+  atualSenha: string;
+
+  @ApiProperty({ example: 'Senha123!' })
+  @IsNotEmpty({ message: 'senha não pode ser omitida' })
+  @IsString({ message: 'senha deve ser uma string' })
+  novaSenha: string;
+
+  @ApiProperty({ example: 'Senha123!' })
+  @IsNotEmpty({ message: 'senha não pode ser omitida' })
+  @IsString({ message: 'senha deve ser uma string' })
+  repNovaSenha: string;
+}

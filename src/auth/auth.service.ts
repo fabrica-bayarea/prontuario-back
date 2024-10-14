@@ -6,7 +6,11 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { SignInUsuarioDto, SignUpUsuarioDto } from './dto/auth.dto';
+import {
+  PasswordDto,
+  SignInUsuarioDto,
+  SignUpUsuarioDto,
+} from './dto/auth.dto';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import * as argon from 'argon2';
 import { Usuario } from '@prisma/client';
@@ -164,5 +168,46 @@ export class AuthService {
     });
 
     return usuario?.tipo === 'CADASTRADOR';
+  }
+
+  async updatePassword(
+    idUser: number,
+    newPass: PasswordDto,
+  ): Promise<{ access_token: string }> {
+    //PEGAR A SENHA ATUAL
+    const user = await this.prisma.usuario.findUnique({
+      where: { id: idUser },
+    });
+
+    // VERIFICAR SE A SENHA ATUAL CONFERE COM A SENHA INFORMADA
+    await argon.hash(newPass.atualSenha);
+    if (!(await argon.verify(user.hash, newPass.atualSenha))){
+      throw new BadRequestException('Senha incorreta!')
+    }
+    
+    //VERIFICAR SE A NOVA SENHA NÃO É IGUAL A ATUAL
+    const newHash = await argon.hash(newPass.novaSenha);
+    if (await argon.verify(user.hash, newPass.novaSenha)) {
+      throw new BadRequestException('A nova senha não pode ser igual a antiga!');
+    }
+    //VERIFICAR SE A PRIMEIRA SENHA DIGITADA É IGUAL A SEGUNDA
+    if (!(newPass.novaSenha === newPass.repNovaSenha)){
+      throw new BadRequestException('As senhas não conferem!')
+    }
+    await this.prisma.usuario.update({
+      where: {
+        id: idUser,
+      },
+      data: {
+        hash: newHash,
+      },
+    });
+    //ENVIAR O JWT
+    const { access_token } = await this.signToken(user.id, user.tipo);
+
+    const response = {
+      access_token,
+    };
+    return response;
   }
 }

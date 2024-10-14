@@ -1,7 +1,22 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Patch,
+  Post,
+  Put,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { SignInUsuarioDto, SignUpUsuarioDto } from './dto/auth.dto';
+import {
+  PasswordDto,
+  SignInUsuarioDto,
+  SignUpUsuarioDto,
+} from './dto/auth.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { JwtGuard } from './guard/jwt.guard';
 
 @ApiTags('Operações de manutenção de Usuários')
 @Controller('auth')
@@ -30,5 +45,21 @@ export class AuthController {
   @Post('signin/')
   signInUsuario(@Body() dto: SignInUsuarioDto) {
     return this.authService.signInUsuario(dto);
+  }
+
+  @ApiOperation({
+    summary: 'Atualiza a senha do usuário logado',
+    description: 'Atualiza a senha do usuário e grava em banco de dados',
+  })
+  @ApiResponse({ status: 201, description: 'Senha atualizada com sucesso' })
+  @ApiResponse({ status: 403, description: 'Senha inválida' })
+  @Patch('reset-password/')
+  @UseGuards(JwtGuard)
+  resetPassword(
+    @Request() req, 
+    @Body() newPass: PasswordDto
+  ) {
+    const idUser = req.user.id;
+    return this.authService.updatePassword(idUser, newPass);
   }
 }
