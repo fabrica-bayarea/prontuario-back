@@ -6,7 +6,11 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { SignInUsuarioDto, SignUpUsuarioDto } from './dto/auth.dto';
+import {
+  SignInUsuarioDto,
+  SignUpUsuarioDto,
+  updatePasswordDto,
+} from './dto/auth.dto';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import * as argon from 'argon2';
 import { Usuario } from '@prisma/client';
@@ -175,5 +179,44 @@ export class AuthService {
     });
 
     return usuario?.tipo === 'CADASTRADOR';
+  }
+
+  async updatePassword(
+    idUser: number,
+    passwordDto: updatePasswordDto,
+  ): Promise<{ access_token: string }> {
+
+    const user = await this.prisma.usuario.findUnique({
+      where: { id: idUser },
+    });
+
+    await argon.hash(passwordDto.currentPass);
+    if (!(await argon.verify(user.hash, passwordDto.currentPass))){
+      throw new BadRequestException('Incorrect password!')
+    }
+    
+    const newHash = await argon.hash(passwordDto.newPass);
+    if (await argon.verify(user.hash, passwordDto.newPass)) {
+      throw new BadRequestException('The new password cannot be the same as the old one!');
+    }
+
+    if (!(passwordDto.newPass === passwordDto.repeatNewPass)){
+      throw new BadRequestException("The passwords don't match!")
+    }
+    await this.prisma.usuario.update({
+      where: {
+        id: idUser,
+      },
+      data: {
+        hash: newHash,
+      },
+    });
+
+    const { access_token } = await this.signToken(user.id, user.tipo);
+
+    const response = {
+      access_token,
+    };
+    return response;
   }
 }
