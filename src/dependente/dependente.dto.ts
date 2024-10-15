@@ -4,7 +4,6 @@ import {
   IsOptional,
   IsPhoneNumber,
   IsString,
-  IsStrongPassword,
   IsDateString,
   IsEnum,
   Matches,
@@ -15,7 +14,26 @@ export type GeneroEnum = 'MASCULINO' | 'FEMININO' | 'OUTRO';
 
 export const generoEnum: GeneroEnum[] = ['MASCULINO', 'FEMININO', 'OUTRO'];
 
-export class SignUpUsuarioDto {
+export type ParentescoEnum =
+  | 'PAI'
+  | 'MAE'
+  | 'IRMAO'
+  | 'IRMA'
+  | 'FILHO'
+  | 'FILHA'
+  | 'OUTRO';
+
+export const parentescoEnum: ParentescoEnum[] = [
+  'PAI',
+  'MAE',
+  'IRMAO',
+  'IRMA',
+  'FILHO',
+  'FILHA',
+  'OUTRO',
+];
+
+export class createDependenteDto {
   @ApiProperty({ example: 'Cleber' })
   @IsNotEmpty({ message: 'nome não deve ser omitido' })
   @IsString({ message: 'nome deve ser uma string' })
@@ -46,18 +64,6 @@ export class SignUpUsuarioDto {
   })
   telefone: string;
 
-  @ApiProperty({ example: 'brasilia' })
-  @IsString({ message: 'nome da cidade deve ser uma string' })
-  cidade: string;
-
-  @ApiProperty({ example: '00000-00' })
-  @IsString({ message: 'cep deve ser uma string' })
-  cep: string;
-
-  @ApiProperty({ example: 'Rua Exemplo, casa 123, Bairro' })
-  @IsString({ message: 'endereço deve ser uma string' })
-  endereco: string;
-
   @ApiProperty({ example: '2024-09-01T17:00:00' })
   @IsDateString()
   nascimento: Date;
@@ -68,38 +74,14 @@ export class SignUpUsuarioDto {
   })
   genero: GeneroEnum;
 
-  @ApiProperty({ example: 'Senha123!' })
-  @IsStrongPassword(
-    {},
-    {
-      message:
-        'senha deve conter no mínimo 8 caracteres, 1 letra mínuscula, 1 maíusucula, 1 número e 1 caractere especial',
-    },
-  )
-  senha: string;
+  @ApiProperty({ example: 'FILHO' })
+  @IsEnum(parentescoEnum, {
+    message: `Deve ser um dos tipos de parentesco: ${parentescoEnum.join(', ')}`,
+  })
+  parentesco: ParentescoEnum;
 
-  @ApiProperty({ example: '2386101945' })
+  @ApiProperty({ example: 'sindrome de tourette' })
   @IsString({ message: 'matricula deve ser uma string' })
   @IsOptional()
-  matricula?: string;
-}
-
-export class SignInUsuarioDto {
-  @IsString()
-  @Matches(/^[0-9]{3}\.[0-9]{3}\.[0-9]{3}\-[0-9]{2}$/, {
-    message:
-      'cpf deve  ter os nove primeiros dígitos agrupados em três grupos de três dígitos separados por um ponto, seguidos de um hífen e dos dois últimos dígitos',
-  })
-  @IsOptional()
-  cpf?: string;
-
-  @ApiProperty({ example: 'cleber.guimaraes@email.com' })
-  @IsEmail({}, { message: 'email deve ser um email válido' })
-  @IsOptional()
-  email?: string;
-
-  @ApiProperty({ example: 'Senha123!' })
-  @IsNotEmpty({ message: 'senha não pode ser omitida' })
-  @IsString({ message: 'senha deve ser uma string' })
-  senha: string;
+  necessidade_especial?: string;
 }

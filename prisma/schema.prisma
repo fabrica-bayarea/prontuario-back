@@ -1,75 +1,138 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// schema.prisma
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "postgresql" // ou o banco de dados de sua escolha
   url      = env("DATABASE_URL")
 }
 
-enum Turnos {
-  Matutino
-  Vespertino
-  Noturno
-  Integral
+enum Status {
+  AGENDADO
+  REALIZADO
+  CANCELADO
+  NAOCOMPARECEU
 }
 
-// Definição do modelo de Curso
-model Curso {
-  id          Int        @id @default(autoincrement())
-  nome        String     @unique
-  turno       Turnos
-  coordenador String
-  programas   Programa[]
-}
-
-// Definição do modelo de Programa Social
-model Programa {
-  id           Int           @id @default(autoincrement())
-  nome         String        @unique
-  descricao    String
-  inicio       DateTime
-  termino      DateTime
-  horario      String
-  publicoAlvo  String
-  cursos       Curso[]
-  atendimentos Atendimento[]
+enum Genero {
+  MASCULINO
+  FEMININO
+  OUTRO
 }
 
 enum TipoUsuario {
   ADMINISTRADOR
-  BENEFICIARIO
+  COLABORADOR
   CADASTRADOR
+  BENEFICIARIO
 }
 
-// Definição do modelo de Usuário
-model Usuario {
-  id           Int           @id @default(autoincrement())
-  nome         String
-  sobrenome    String
-  cpf          String        @unique
-  email        String        @unique
-  telefone     String?       @unique
-  cidade       String
-  cep          String 
-  endereco     String 
-  hash         String
-  tipo         TipoUsuario
-  atendimentos Atendimento[] @relation("UsuarioAtendimentos")
-  beneficiarioAtendimentos Atendimento[] @relation("BeneficiadorAtendimentos")
+enum Parentesco {
+  PAI
+  MAE
+  IRMAO
+  IRMA
+  FILHO
+  FILHA
+  OUTRO
 }
 
-// Definição do modelo de Atendimento
-model Atendimento {
-  id             Int          @id @default(autoincrement())
-  data           DateTime
-  beneficiario   Usuario      @relation("BeneficiadorAtendimentos", fields: [beneficiarioId], references: [id])
-  beneficiarioId Int
-  usuario        Usuario      @relation("UsuarioAtendimentos", fields: [usuarioId], references: [id])
-  usuarioId      Int
-  programa       Programa     @relation(fields: [programaId], references: [id])
+model Periodo_Atendimento {
+  id             Int      @id @default(autoincrement())
+  Programa       Programa @relation(fields: [programaId], references: [id])
   programaId     Int
+  data_inicio    DateTime
+  data_fim       DateTime
+  horario_inicio String   @db.Char(5)
+  horario_fim    String   @db.Char(5)
+  dias_da_semana Int
+
+  Vaga        Vaga[]
+  Atendimento Atendimento[]
+}
+
+model Atendimento {
+  id                   Int                 @id @default(autoincrement())
+  Periodo_Atendimento  Periodo_Atendimento @relation(fields: [periodoAtendimentoId], references: [id])
+  periodoAtendimentoId Int
+  Beneficiario         Usuario             @relation(fields: [beneficiarioId], references: [id])
+  beneficiarioId       Int
+  Vaga                 Vaga                @relation(fields: [vagaId], references: [id])
+  vagaId               Int
+  status               Status              @default(AGENDADO)
+  observacao           String?             @db.VarChar(800)
+}
+
+model Vaga {
+  id                   Int                 @id @default(autoincrement())
+  Colaborador          Usuario             @relation(fields: [colaboradorId], references: [id])
+  colaboradorId        Int
+  Periodo_Atendimento  Periodo_Atendimento @relation(fields: [periodoAtendimentoId], references: [id])
+  periodoAtendimentoId Int
+  data_hora_inicio     DateTime
+  data_hora_fim        DateTime
+
+  Atendimento Atendimento[]
+}
+
+model Curso {
+  id          Int    @id @default(autoincrement())
+  nome        String @unique @db.VarChar(150)
+  descricao   String @db.VarChar(500)
+  coordenador String @db.VarChar(150)
+  campus      String @db.VarChar(150)
+
+  usuarios  Usuario[]  @relation("UsuarioCurso")
+  programas Programa[] @relation("CursoPrograma")
+}
+
+model Programa {
+  id           Int    @id @default(autoincrement())
+  nome         String @unique @db.VarChar(150)
+  descricao    String @db.VarChar(500)
+  publico_alvo String @db.VarChar(100)
+
+  cursos               Curso[]               @relation("CursoPrograma")
+  usuarios             Usuario[]             @relation("UsuarioPrograma")
+  periodo_atendimentos Periodo_Atendimento[]
+}
+
+model Usuario {
+  id         Int         @id @default(autoincrement())
+  nome       String      @db.VarChar(50)
+  sobrenome  String      @db.VarChar(200)
+  cpf        String      @unique @db.Char(14)
+  cep        String      @db.Char(9)
+  cidade     String      @db.VarChar(200)
+  endereco   String      @db.VarChar(300)
+  nascimento DateTime
+  genero     Genero
+  email      String      @unique @db.VarChar(360)
+  hash       String
+  telefone   String      @db.Char(14)
+  tipo       TipoUsuario
+  matricula  String?     @db.VarChar(15)
+
+  cursos       Curso[]       @relation("UsuarioCurso")
+  programas    Programa[]    @relation("UsuarioPrograma")
+  dependentes  Dependente[]
+  atendimentos Atendimento[]
+  Vaga         Vaga[]
+}
+
+model Dependente {
+  id                   Int       @id @default(autoincrement())
+  Usuario              Usuario   @relation(fields: [usuarioId], references: [id])
+  usuarioId            Int
+  nome                 String    @db.VarChar(50)
+  sobrenome            String    @db.VarChar(200)
+  cpf                  String    @unique @db.Char(14)
+  nascimento           DateTime
+  genero               Genero
+  parentesco           Parentesco    
+  necessidade_especial String?   @db.VarChar(500)
+  email                String    @unique @db.VarChar(360)
+  telefone             String    @db.Char(14)
 }

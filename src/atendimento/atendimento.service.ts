@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -7,11 +6,9 @@ import {
 import { AuthService } from 'src/auth/auth.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
-  AtendimentoFilterDto,
   AtendimentoResponse,
   CreateAtendimentoDto,
   GetAtendimentoByCpfDto,
-  UpdateDataAtendimentoDto,
 } from './atendimento.dto';
 
 @Injectable()
@@ -25,76 +22,82 @@ export class AtendimentoService {
     idUsuario: number,
     dto: CreateAtendimentoDto,
   ): Promise<AtendimentoResponse> {
-    const usuario = await this.prisma.usuario.findUnique({
-      where: { id: idUsuario },
-    });
-    if (!usuario) {
-      throw new ForbiddenException('credenciais inválidas');
-    }
-
     const beneficiario = await this.prisma.usuario.findUnique({
-      where: {
-        cpf: dto.cpfBeneficiario,
-      },
+      where: { id: idUsuario },
     });
 
     if (!beneficiario) {
-      throw new NotFoundException(
-        `beneficiário com CPF ${dto.cpfBeneficiario} não encontrado`,
-      );
+      throw new ForbiddenException('credenciais inválidas');
     }
 
-    const programa = await this.prisma.programa.findUnique({
-      where: {
-        nome: dto.nomePrograma,
-      },
+    const vaga = await this.prisma.vaga.findUnique({
+      where: { id: dto.vaga_id },
     });
 
-    if (!programa) {
+    if (!vaga) {
       throw new NotFoundException(
-        `programa com nome ${dto.nomePrograma} não encontrado`,
+        `Disponibilidade do colaborador com id ${dto.vaga_id} não encontrado`,
       );
     }
 
-    const dataAgenda = new Date(dto.data);
-    const dataAtual = new Date();
-
-    if (dataAgenda.getTime() < dataAtual.getTime()) {
-      throw new BadRequestException(
-        'Data inválida! Agende para uma data futura.',
-      );
-    }
+    const colaborador = await this.prisma.usuario.findUnique({
+      where: { id: vaga.colaboradorId },
+    });
 
     const atendimento = await this.prisma.atendimento.create({
       data: {
-        data: dataAgenda,
-        usuarioId: idUsuario,
-        programaId: programa.id,
-        beneficiarioId: beneficiario.id,
+        Beneficiario: { connect: { id: beneficiario.id } },
+        Vaga: { connect: { id: dto.vaga_id } },
+        Periodo_Atendimento: {
+          connect: { id: vaga.periodoAtendimentoId },
+        },
+        status: 'AGENDADO',
+        observacao: dto.observacao,
       },
+    });
+
+    const periodoAtendimento = await this.prisma.periodo_Atendimento.findUnique(
+      {
+        where: { id: vaga.colaboradorId },
+      },
+    );
+
+    const programa = await this.prisma.programa.findUnique({
+      where: { id: periodoAtendimento.programaId },
     });
 
     const response: AtendimentoResponse = {
       atendimento: {
         id: atendimento.id,
-        data: atendimento.data,
+        status: 'AGENDADO',
+        observacao: atendimento.observacao,
         beneficiario: {
           id: beneficiario.id,
           nome: beneficiario.nome,
           cpf: beneficiario.cpf,
-          email: beneficiario.email,
+          email: beneficiario.cpf,
           telefone: beneficiario.telefone,
         },
-        programa: {
-          id: programa.id,
-          nome: programa.nome,
-        },
-        usuario: {
-          id: idUsuario,
-          nome: usuario.nome,
-          cpf: usuario.cpf,
-          email: usuario.email,
-          telefone: usuario.telefone,
+        vaga: {
+          id: vaga.id,
+          dataHoraInicio: vaga.data_hora_inicio,
+          dataHoraFim: vaga.data_hora_fim,
+          colaborador: {
+            id: colaborador.id,
+            nome: colaborador.nome,
+            cpf: colaborador.cpf,
+            email: colaborador.email,
+            telefone: colaborador.telefone,
+            matricula: colaborador.matricula,
+          },
+          periodoAtendimento: {
+            id: vaga.periodoAtendimentoId,
+            programa: {
+              id: programa.id,
+              nome: programa.nome,
+              descricao: programa.descricao,
+            },
+          },
         },
       },
     };
@@ -105,33 +108,53 @@ export class AtendimentoService {
   async getAllAtendimentos(): Promise<AtendimentoResponse[]> {
     const atendimentos = await this.prisma.atendimento.findMany({
       include: {
-        beneficiario: true,
-        programa: true,
-        usuario: true,
+        Beneficiario: true,
+        Vaga: {
+          include: {
+            Colaborador: true,
+            Periodo_Atendimento: {
+              include: {
+                Programa: true,
+              },
+            },
+          },
+        },
       },
     });
 
     return atendimentos.map(atendimento => ({
       atendimento: {
         id: atendimento.id,
-        data: atendimento.data,
+        status: atendimento.status,
+        observacao: atendimento.observacao,
         beneficiario: {
-          id: atendimento.beneficiario.id,
-          nome: atendimento.beneficiario.nome,
-          cpf: atendimento.beneficiario.cpf,
-          email: atendimento.beneficiario.email,
-          telefone: atendimento.beneficiario.telefone,
+          id: atendimento.Beneficiario.id,
+          nome: atendimento.Beneficiario.nome,
+          cpf: atendimento.Beneficiario.cpf,
+          email: atendimento.Beneficiario.cpf,
+          telefone: atendimento.Beneficiario.telefone,
         },
-        programa: {
-          id: atendimento.programa.id,
-          nome: atendimento.programa.nome,
-        },
-        usuario: {
-          id: atendimento.usuario.id,
-          nome: atendimento.usuario.nome,
-          cpf: atendimento.usuario.cpf,
-          email: atendimento.usuario.email,
-          telefone: atendimento.usuario.telefone,
+        vaga: {
+          id: atendimento.Vaga.id,
+          dataHoraInicio: atendimento.Vaga.data_hora_inicio,
+          dataHoraFim: atendimento.Vaga.data_hora_fim,
+          colaborador: {
+            id: atendimento.Vaga.Colaborador.id,
+            nome: atendimento.Vaga.Colaborador.nome,
+            cpf: atendimento.Vaga.Colaborador.cpf,
+            email: atendimento.Vaga.Colaborador.email,
+            telefone: atendimento.Vaga.Colaborador.telefone,
+            matricula: atendimento.Vaga.Colaborador.matricula,
+          },
+          periodoAtendimento: {
+            id: atendimento.Vaga.periodoAtendimentoId,
+            programa: {
+              id: atendimento.Vaga.Periodo_Atendimento.Programa.id,
+              nome: atendimento.Vaga.Periodo_Atendimento.Programa.nome,
+              descricao:
+                atendimento.Vaga.Periodo_Atendimento.Programa.descricao,
+            },
+          },
         },
       },
     }));
@@ -141,45 +164,65 @@ export class AtendimentoService {
     dto: GetAtendimentoByCpfDto,
   ): Promise<AtendimentoResponse[]> {
     const beneficiario = await this.prisma.usuario.findUnique({
-      where: { cpf: dto.cpfBeneficiario },
+      where: { cpf: dto.cpf_beneficiario },
     });
 
     if (!beneficiario) {
       throw new NotFoundException(
-        `beneficiário com CPF ${dto.cpfBeneficiario} não encontrado`,
+        `beneficiário com CPF ${dto.cpf_beneficiario} não encontrado`,
       );
     }
 
     const atendimentos = await this.prisma.atendimento.findMany({
       where: { beneficiarioId: beneficiario.id },
       include: {
-        beneficiario: true,
-        programa: true,
-        usuario: true,
+        Beneficiario: true,
+        Vaga: {
+          include: {
+            Colaborador: true,
+            Periodo_Atendimento: {
+              include: {
+                Programa: true,
+              },
+            },
+          },
+        },
       },
     });
 
     return atendimentos.map(atendimento => ({
       atendimento: {
         id: atendimento.id,
-        data: atendimento.data,
+        status: atendimento.status,
+        observacao: atendimento.observacao,
         beneficiario: {
-          id: atendimento.beneficiario.id,
-          nome: atendimento.beneficiario.nome,
-          cpf: atendimento.beneficiario.cpf,
-          email: atendimento.beneficiario.email,
-          telefone: atendimento.beneficiario.telefone,
+          id: atendimento.Beneficiario.id,
+          nome: atendimento.Beneficiario.nome,
+          cpf: atendimento.Beneficiario.cpf,
+          email: atendimento.Beneficiario.cpf,
+          telefone: atendimento.Beneficiario.telefone,
         },
-        programa: {
-          id: atendimento.programa.id,
-          nome: atendimento.programa.nome,
-        },
-        usuario: {
-          id: atendimento.usuario.id,
-          nome: atendimento.usuario.nome,
-          cpf: atendimento.usuario.cpf,
-          email: atendimento.usuario.email,
-          telefone: atendimento.usuario.telefone,
+        vaga: {
+          id: atendimento.Vaga.id,
+          dataHoraInicio: atendimento.Vaga.data_hora_inicio,
+          dataHoraFim: atendimento.Vaga.data_hora_fim,
+          colaborador: {
+            id: atendimento.Vaga.Colaborador.id,
+            nome: atendimento.Vaga.Colaborador.nome,
+            cpf: atendimento.Vaga.Colaborador.cpf,
+            email: atendimento.Vaga.Colaborador.email,
+            telefone: atendimento.Vaga.Colaborador.telefone,
+            matricula: atendimento.Vaga.Colaborador.matricula,
+          },
+          periodoAtendimento: {
+            id: atendimento.Vaga.periodoAtendimentoId,
+            programa: {
+              id: atendimento.Vaga.Periodo_Atendimento.Programa.id,
+              nome: atendimento.Vaga.Periodo_Atendimento.Programa.nome,
+              descricao:
+                atendimento.Vaga.Periodo_Atendimento.Programa.descricao,
+            },
+          },
         },
       },
     }));
@@ -199,100 +242,5 @@ export class AtendimentoService {
     await this.prisma.atendimento.delete({
       where: { id: atendimentoId },
     });
-  }
-
-  async getAtendimentosByDateRange(
-    filter: AtendimentoFilterDto,
-  ): Promise<AtendimentoResponse[]> {
-    const { dataInicio, dataFim } = filter;
-
-    const atendimentos = await this.prisma.atendimento.findMany({
-      where: {
-        data: {
-          gte: new Date(dataInicio),
-          lte: new Date(dataFim),
-        },
-      },
-      include: {
-        beneficiario: true,
-        programa: true,
-        usuario: true,
-      },
-    });
-
-    return atendimentos.map(atendimento => ({
-      atendimento: {
-        id: atendimento.id,
-        data: atendimento.data,
-        beneficiario: {
-          id: atendimento.beneficiario.id,
-          nome: atendimento.beneficiario.nome,
-          cpf: atendimento.beneficiario.cpf,
-          email: atendimento.beneficiario.email,
-          telefone: atendimento.beneficiario.telefone,
-        },
-        programa: {
-          id: atendimento.programa.id,
-          nome: atendimento.programa.nome,
-        },
-        usuario: {
-          id: atendimento.usuario.id,
-          nome: atendimento.usuario.nome,
-          cpf: atendimento.usuario.cpf,
-          email: atendimento.usuario.email,
-          telefone: atendimento.usuario.telefone,
-        },
-      },
-    }));
-  }
-
-  async updateAtendimentoDate(
-    atendimentoId: number,
-    dto: UpdateDataAtendimentoDto,
-  ): Promise<AtendimentoResponse> {
-    const atendimento = await this.prisma.atendimento.findUnique({
-      where: { id: atendimentoId },
-    });
-
-    if (!atendimento) {
-      throw new NotFoundException(
-        `atendimento com ID ${atendimentoId} não encontrado`,
-      );
-    }
-
-    const updatedAtendimento = await this.prisma.atendimento.update({
-      where: { id: atendimentoId },
-      data: { data: new Date(dto.novaData) },
-      include: {
-        beneficiario: true,
-        programa: true,
-        usuario: true,
-      },
-    });
-
-    return {
-      atendimento: {
-        id: updatedAtendimento.id,
-        data: updatedAtendimento.data,
-        beneficiario: {
-          id: updatedAtendimento.beneficiario.id,
-          nome: updatedAtendimento.beneficiario.nome,
-          cpf: updatedAtendimento.beneficiario.cpf,
-          email: updatedAtendimento.beneficiario.email,
-          telefone: updatedAtendimento.beneficiario.telefone,
-        },
-        programa: {
-          id: updatedAtendimento.programa.id,
-          nome: updatedAtendimento.programa.nome,
-        },
-        usuario: {
-          id: updatedAtendimento.usuario.id,
-          nome: updatedAtendimento.usuario.nome,
-          cpf: updatedAtendimento.usuario.cpf,
-          email: updatedAtendimento.usuario.email,
-          telefone: updatedAtendimento.usuario.telefone,
-        },
-      },
-    };
   }
 }

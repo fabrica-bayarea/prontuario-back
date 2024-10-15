@@ -6,31 +6,32 @@ import {
   IsOptional,
   IsPhoneNumber,
   IsString,
+  IsDateString,
 } from 'class-validator';
 
-export type TipoDeUsuario = 'ADMINISTRADOR' | 'CADASTRADOR' | 'BENEFICIARIO';
+export type TipoDeUsuario = 'MASCULINO' | 'FEMININO' | 'OUTRO';
 
 export const TiposDeUsuario: TipoDeUsuario[] = [
-  'ADMINISTRADOR',
-  'CADASTRADOR',
-  'BENEFICIARIO',
+  'MASCULINO',
+  'FEMININO',
+  'OUTRO',
 ];
 
 export class UpdateProfileDto {
   @ApiProperty({ example: 'Cleber' })
-  @IsNotEmpty({ message: 'nome não deve ser omitido' })
+  @IsOptional()
   @IsString({ message: 'nome deve ser uma string' })
-  nome: string;
+  nome?: string;
 
   @ApiProperty({ example: 'Guimarães' })
-  @IsNotEmpty({ message: 'sobrenome não deve ser omitido' })
+  @IsOptional()
   @IsString({ message: 'nome deve ser uma string' })
-  sobrenome: string;
+  sobrenome?: string;
 
   @ApiProperty({ example: 'cleber.guimaraes@email.com' })
-  @IsEmail({}, { message: 'email deve ser um email válido' })
+  @IsOptional()
   @IsString({ message: 'email deve ser uma string' })
-  email: string;
+  email?: string;
 
   @ApiProperty({ example: '+5561995435997' })
   @IsOptional()
@@ -38,19 +39,39 @@ export class UpdateProfileDto {
   @IsPhoneNumber('BR', {
     message: 'telefone deve ter o formato <CODIGO_DO_PAIS><DDD>xxxxxxxx',
   })
-  telefone: string;
+  telefone?: string;
 
   @ApiProperty({ example: 'brasilia' })
+  @IsOptional()
   @IsString({ message: 'nome da cidade deve ser uma string' })
-  cidade: string;
+  cidade?: string;
 
   @ApiProperty({ example: '00000-00' })
+  @IsOptional()
   @IsString({ message: 'cep deve ser uma string' })
-  cep: string;
+  cep?: string;
 
   @ApiProperty({ example: 'Rua Exemplo, casa 123, Bairro' })
+  @IsOptional()
   @IsString({ message: 'endereço deve ser uma string' })
-  endereco: string;
+  endereco?: string;
+
+  @ApiProperty({ example: '1999-09-01' })
+  @IsOptional()
+  @IsDateString()
+  nascimento?: Date;
+
+  @ApiProperty({ example: 'MASCULINO' })
+  @IsOptional()
+  @IsEnum(TiposDeUsuario, {
+    message: `gênero deve ser um dos valores: ${TiposDeUsuario.join(', ')}`,
+  })
+  genero?: TipoDeUsuario;
+
+  @ApiProperty({ example: '2386101945' })
+  @IsOptional()
+  @IsString({ message: 'matricula deve ser uma string' })
+  matricula?: string;
 }
 
 export class ProfileDto {
@@ -89,12 +110,13 @@ export class ProfileDto {
   @IsString({ message: 'endereço deve ser uma string' })
   endereco: string;
 
-  @ApiProperty({
-    enum: ['ADMINISTRADOR', 'CADASTRADOR', 'BENEFICIARIO'],
-    example: 'ADMINISTRADOR',
-  })
+  @ApiProperty({ example: '1999-09-01' })
+  @IsDateString()
+  nascimento: Date;
+
+  @ApiProperty({ example: 'MASCULINO' })
   @IsEnum(TiposDeUsuario, {
-    message: 'tipo deve ser ADMINISTRADOR, CADASTRADOR ou BENEFICIARIO',
+    message: `gênero deve ser um dos valores: ${TiposDeUsuario.join(', ')}`,
   })
-  tipo: TipoDeUsuario;
+  genero: TipoDeUsuario;
 }

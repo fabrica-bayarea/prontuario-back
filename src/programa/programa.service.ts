@@ -31,8 +31,7 @@ export class ProgramaService {
       throw new ForbiddenException('permissões insuficientes.');
     }
 
-    const { nome, curso, descricao, inicio, termino, horario, publicoAlvo } =
-      createProgramaDto;
+    const { nome, curso, descricao, publico_alvo } = createProgramaDto;
     let exists: any;
 
     if (isString(curso)) {
@@ -46,11 +45,12 @@ export class ProgramaService {
         data: {
           nome,
           descricao,
-          inicio,
-          termino,
-          horario,
-          publicoAlvo,
-          cursos: { connect: [{ nome: curso }] },
+          publico_alvo,
+          cursos: {
+            connect: {
+              id: exists.id,
+            },
+          },
         },
       });
     } else if (isInt(curso)) {
@@ -64,22 +64,21 @@ export class ProgramaService {
         data: {
           nome,
           descricao,
-          inicio,
-          termino,
-          horario,
-          publicoAlvo,
-          cursos: { connect: [{ id: curso }] },
+          publico_alvo,
+          cursos: {
+            connect: {
+              id: exists.id,
+            },
+          },
         },
       });
     }
   }
 
   async getAllProgramas(): Promise<Programa[]> {
-    const programas = await this.prisma.programa.findMany({
-      include: { cursos: true, atendimentos: true },
+    return this.prisma.programa.findMany({
+      include: { cursos: true },
     });
-
-    return programas;
   }
 
   async getProgramaById(id: number): Promise<Programa> {
@@ -121,7 +120,11 @@ export class ProgramaService {
 
     return await this.prisma.programa.update({
       where: { id },
-      data: { nome: updateProgramaDto.nome },
+      data: {
+        nome: updateProgramaDto.nome,
+        descricao: updateProgramaDto.descricao,
+        publico_alvo: updateProgramaDto.publico_alvo,
+      },
     });
   }
 

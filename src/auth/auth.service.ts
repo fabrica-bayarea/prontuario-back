@@ -21,7 +21,7 @@ export class AuthService {
 
   async signToken(
     idUsuario: number,
-    tipo: 'ADMINISTRADOR' | 'CADASTRADOR' | 'BENEFICIARIO',
+    tipo: 'ADMINISTRADOR' | 'CADASTRADOR' | 'COLABORADOR' | 'BENEFICIARIO',
   ): Promise<{ access_token: string }> {
     const payload = {
       sub: idUsuario,
@@ -64,7 +64,10 @@ export class AuthService {
           cidade: dto.cidade,
           cep: dto.cep,
           endereco: dto.endereco,
+          nascimento: new Date(dto.nascimento),
+          genero: dto.genero,
           hash: hash,
+          matricula: dto.matricula,
         };
 
         if (dto.telefone) {
@@ -156,6 +159,14 @@ export class AuthService {
     });
 
     return usuario?.tipo === 'BENEFICIARIO';
+  }
+
+  async isColaborador(idUsuario: number): Promise<boolean> {
+    const usuario = await this.prisma.usuario.findUnique({
+      where: { id: idUsuario },
+    });
+
+    return usuario?.tipo === 'COLABORADOR';
   }
 
   async isCadastrador(idUsuario: number): Promise<boolean> {
