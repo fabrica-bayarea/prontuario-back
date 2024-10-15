@@ -5,15 +5,14 @@ import {
   HttpStatus,
   Patch,
   Post,
-  Put,
   Request,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
-  PasswordDto,
   SignInUsuarioDto,
   SignUpUsuarioDto,
+  updatePasswordDto,
 } from './dto/auth.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtGuard } from './guard/jwt.guard';
@@ -57,9 +56,9 @@ export class AuthController {
   @UseGuards(JwtGuard)
   resetPassword(
     @Request() req, 
-    @Body() newPass: PasswordDto
+    @Body() passwordDto: updatePasswordDto
   ) {
     const idUser = req.user.id;
-    return this.authService.updatePassword(idUser, newPass);
+    return this.authService.updatePassword(idUser, passwordDto);
   }
 }

@@ -7,9 +7,9 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
-  PasswordDto,
   SignInUsuarioDto,
   SignUpUsuarioDto,
+  updatePasswordDto,
 } from './dto/auth.dto';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import * as argon from 'argon2';
@@ -172,27 +172,25 @@ export class AuthService {
 
   async updatePassword(
     idUser: number,
-    newPass: PasswordDto,
+    passwordDto: updatePasswordDto,
   ): Promise<{ access_token: string }> {
-    //PEGAR A SENHA ATUAL
+
     const user = await this.prisma.usuario.findUnique({
       where: { id: idUser },
     });
 
-    // VERIFICAR SE A SENHA ATUAL CONFERE COM A SENHA INFORMADA
-    await argon.hash(newPass.atualSenha);
-    if (!(await argon.verify(user.hash, newPass.atualSenha))){
-      throw new BadRequestException('Senha incorreta!')
+    await argon.hash(passwordDto.currentPass);
+    if (!(await argon.verify(user.hash, passwordDto.currentPass))){
+      throw new BadRequestException('Incorrect password!')
     }
     
-    //VERIFICAR SE A NOVA SENHA NÃO É IGUAL A ATUAL
-    const newHash = await argon.hash(newPass.novaSenha);
-    if (await argon.verify(user.hash, newPass.novaSenha)) {
-      throw new BadRequestException('A nova senha não pode ser igual a antiga!');
+    const newHash = await argon.hash(passwordDto.newPass);
+    if (await argon.verify(user.hash, passwordDto.newPass)) {
+      throw new BadRequestException('The new password cannot be the same as the old one!');
     }
-    //VERIFICAR SE A PRIMEIRA SENHA DIGITADA É IGUAL A SEGUNDA
-    if (!(newPass.novaSenha === newPass.repNovaSenha)){
-      throw new BadRequestException('As senhas não conferem!')
+
+    if (!(passwordDto.newPass === passwordDto.repeatNewPass)){
+      throw new BadRequestException("The passwords don't match!")
     }
     await this.prisma.usuario.update({
       where: {
@@ -202,7 +200,7 @@ export class AuthService {
         hash: newHash,
       },
     });
-    //ENVIAR O JWT
+
     const { access_token } = await this.signToken(user.id, user.tipo);
 
     const response = {
