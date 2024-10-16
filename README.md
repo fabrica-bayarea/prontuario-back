@@ -80,7 +80,7 @@ POSTGRES_DB=db_postgres
 Suba o sistema inteiro
 
 ```bash
-docker compose up -d
+docker compose --profile prod up -d
 ```
 
 > [!NOTE]  
