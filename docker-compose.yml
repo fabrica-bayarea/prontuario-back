@@ -5,8 +5,8 @@ services:
       dockerfile: Dockerfile
     container_name: prontuario-api
     profiles:
-      - deploy
-    command: ["sh", "-c", "npx prisma migrate deploy && npm run build --verbose && npm run start:prod"]
+      - prod
+    command: ["sh", "-c", "npx prisma migrate deploy && npx prisma generate && npm run build --verbose && npm run start:prod"]
     restart: always
     env_file:
       - .env
@@ -33,7 +33,7 @@ services:
     image: 'postgres:16.3'
     container_name: prontuario-postgres
     profiles:
-      - deploy
+      - prod
     restart: always
     env_file:
       - .env
@@ -58,7 +58,7 @@ services:
     image: 'postgres:16.3'
     container_name: prontuario-dev-postgres
     profiles:
-      - develop
+      - dev
     restart: on-failure:5
     env_file:
       - .env
