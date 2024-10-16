@@ -5,7 +5,6 @@ import {
   Get,
   Param,
   ParseIntPipe,
-  Patch,
   Post,
   Request,
   UseGuards,
@@ -13,11 +12,9 @@ import {
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { AtendimentoService } from './atendimento.service';
 import {
-  AtendimentoFilterDto,
   AtendimentoResponse,
   CreateAtendimentoDto,
   GetAtendimentoByCpfDto,
-  UpdateDataAtendimentoDto,
 } from './atendimento.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
@@ -78,23 +75,6 @@ export class AtendimentoController {
   }
 
   @ApiOperation({
-    summary: 'Operação de listagem de Atendimentos por intervalo de datas',
-    description:
-      'Retorna a lista atualizada de todos os Atendimentos no intervalo especificado',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Atendimentos listados com sucesso',
-  })
-  @ApiResponse({ status: 400, description: 'Bad request' })
-  @Get('by-date')
-  async getAtendimentosByDate(
-    @Body() dto: AtendimentoFilterDto,
-  ): Promise<AtendimentoResponse[]> {
-    return this.atendimentoService.getAtendimentosByDateRange(dto);
-  }
-
-  @ApiOperation({
     summary: 'Operação de remoção de um Atendimento do banco de dados por ID',
     description:
       'Remove um Atendimento do banco de dados pelo ID passado por parâmetro',
@@ -107,23 +87,5 @@ export class AtendimentoController {
     @Param('id', ParseIntPipe) id: number,
   ) {
     return this.atendimentoService.deleteAtendimentoById(id);
-  }
-
-  @ApiOperation({
-    summary: 'Operação de atualização Atendimento do banco de dados por ID',
-    description:
-      'Altera a data de um Atendimento pelo ID passado por parâmetro',
-  })
-  @ApiResponse({
-    status: 204,
-    description: 'Atendimento atualizado com sucesso',
-  })
-  @ApiResponse({ status: 404, description: 'Atendimento não encontrado' })
-  @Patch('update-date/:id')
-  async updateAtendimentoDate(
-    @Param('id', ParseIntPipe) atendimentoId: number,
-    @Body() dto: UpdateDataAtendimentoDto,
-  ): Promise<AtendimentoResponse> {
-    return this.atendimentoService.updateAtendimentoDate(atendimentoId, dto);
   }
 }

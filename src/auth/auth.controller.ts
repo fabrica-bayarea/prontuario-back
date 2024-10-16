@@ -20,7 +20,7 @@ import { JwtGuard } from './guard/jwt.guard';
 @ApiTags('Operações de manutenção de Usuários')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   @ApiOperation({
     summary: 'Cadastra um novo Usuário',
@@ -54,11 +54,21 @@ export class AuthController {
   @ApiResponse({ status: 403, description: 'Senha inválida' })
   @Patch('reset-password/')
   @UseGuards(JwtGuard)
-  resetPassword(
-    @Request() req, 
-    @Body() passwordDto: updatePasswordDto
-  ) {
+  resetPassword(@Request() req, @Body() passwordDto: updatePasswordDto) {
     const idUser = req.user.id;
     return this.authService.updatePassword(idUser, passwordDto);
+  }
+
+  @ApiOperation({
+    summary: 'Desativa a conta do usuário logado',
+    description: 'Desativa a conta do usuário e grava em banco de dados',
+  })
+  @ApiResponse({ status: 200, description: 'Usuario desativado' })
+  @ApiResponse({ status: 401, description: 'Usuario não logado' })
+  @Patch('disable-user/')
+  @UseGuards(JwtGuard)
+  disableUser(@Request() req) {
+    const idUser = req.user.id;
+    return this.authService.disableUser(idUser);
   }
 }

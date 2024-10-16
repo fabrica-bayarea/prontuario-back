@@ -5,17 +5,15 @@ import {
   IsPhoneNumber,
   IsString,
   IsStrongPassword,
+  IsDateString,
+  IsEnum,
   Matches,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export type TipoDeUsuario = 'ADMINISTRADOR' | 'BENEFICIARIO' | 'CADASTRADOR';
+export type GeneroEnum = 'MASCULINO' | 'FEMININO' | 'OUTRO';
 
-export const TiposDeUsuario: TipoDeUsuario[] = [
-  'ADMINISTRADOR',
-  'BENEFICIARIO',
-  'CADASTRADOR',
-];
+export const generoEnum: GeneroEnum[] = ['MASCULINO', 'FEMININO', 'OUTRO'];
 
 export class SignUpUsuarioDto {
   @ApiProperty({ example: 'Cleber' })
@@ -60,6 +58,16 @@ export class SignUpUsuarioDto {
   @IsString({ message: 'endereço deve ser uma string' })
   endereco: string;
 
+  @ApiProperty({ example: '2024-09-01T17:00:00' })
+  @IsDateString()
+  nascimento: Date;
+
+  @ApiProperty({ example: 'MASCULINO' })
+  @IsEnum(generoEnum, {
+    message: `Deve ser um dos seguintes dias da semana: ${generoEnum.join(', ')}`,
+  })
+  genero: GeneroEnum;
+
   @ApiProperty({ example: 'Senha123!' })
   @IsStrongPassword(
     {},
@@ -69,6 +77,11 @@ export class SignUpUsuarioDto {
     },
   )
   senha: string;
+
+  @ApiProperty({ example: '2386101945' })
+  @IsString({ message: 'matricula deve ser uma string' })
+  @IsOptional()
+  matricula?: string;
 }
 
 export class SignInUsuarioDto {
@@ -80,7 +93,7 @@ export class SignInUsuarioDto {
   @IsOptional()
   cpf?: string;
 
-  @ApiProperty({ example: 'rpaiva654@email.com' })
+  @ApiProperty({ example: 'cleber.guimaraes@email.com' })
   @IsEmail({}, { message: 'email deve ser um email válido' })
   @IsOptional()
   email?: string;
@@ -94,15 +107,15 @@ export class updatePasswordDto {
   @ApiProperty({ example: 'Senha123!' })
   @IsNotEmpty({ message: 'senha não pode ser omitida' })
   @IsString({ message: 'senha deve ser uma string' })
-  currentPass: string;
+  current_pass: string;
 
   @ApiProperty({ example: 'Senha123!' })
   @IsNotEmpty({ message: 'senha não pode ser omitida' })
   @IsString({ message: 'senha deve ser uma string' })
-  newPass: string;
+  new_pass: string;
 
   @ApiProperty({ example: 'Senha123!' })
   @IsNotEmpty({ message: 'senha não pode ser omitida' })
   @IsString({ message: 'senha deve ser uma string' })
-  repeatNewPass: string;
+  repeat_new_pass: string;
 }

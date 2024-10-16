@@ -25,7 +25,7 @@ export class AuthService {
 
   async signToken(
     idUsuario: number,
-    tipo: 'ADMINISTRADOR' | 'CADASTRADOR' | 'BENEFICIARIO',
+    tipo: 'ADMINISTRADOR' | 'CADASTRADOR' | 'COLABORADOR' | 'BENEFICIARIO',
   ): Promise<{ access_token: string }> {
     const payload = {
       sub: idUsuario,
@@ -68,7 +68,10 @@ export class AuthService {
           cidade: dto.cidade,
           cep: dto.cep,
           endereco: dto.endereco,
+          nascimento: new Date(dto.nascimento),
+          genero: dto.genero,
           hash: hash,
+          matricula: dto.matricula,
         };
 
         if (dto.telefone) {
@@ -131,6 +134,10 @@ export class AuthService {
 
     if (!senhaCorreta) throw new ForbiddenException('Credenciais incorretas');
 
+    const isActive = await this.isActive(usuario.id);
+
+    if (!isActive) throw new ForbiddenException('Usuario desativado');
+
     const { access_token } = await this.signToken(usuario.id, usuario.tipo);
     const response = {
       access_token,
@@ -144,6 +151,53 @@ export class AuthService {
       },
     };
     return response;
+  }
+
+  async updatePassword(
+    idUser: number,
+    passwordDto: updatePasswordDto,
+  ): Promise<{ access_token: string }> {
+    const user = await this.prisma.usuario.findUnique({
+      where: { id: idUser },
+    });
+
+    await argon.hash(passwordDto.current_pass);
+    if (!(await argon.verify(user.hash, passwordDto.current_pass))) {
+      throw new BadRequestException('Incorrect password!');
+    }
+
+    const newHash = await argon.hash(passwordDto.new_pass);
+    if (await argon.verify(user.hash, passwordDto.new_pass)) {
+      throw new BadRequestException(
+        'The new password cannot be the same as the old one!',
+      );
+    }
+
+    if (!(passwordDto.new_pass === passwordDto.repeat_new_pass)) {
+      throw new BadRequestException("The passwords don't match!");
+    }
+    await this.prisma.usuario.update({
+      where: {
+        id: idUser,
+      },
+      data: {
+        hash: newHash,
+      },
+    });
+
+    const { access_token } = await this.signToken(user.id, user.tipo);
+
+    const response = {
+      access_token,
+    };
+    return response;
+  }
+
+  async disableUser(id: number): Promise<void> {
+    await this.prisma.usuario.update({
+      where: { id },
+      data: { ativo: false },
+    });
   }
 
   async isAdministrator(idUsuario: number): Promise<boolean> {
@@ -162,6 +216,14 @@ export class AuthService {
     return usuario?.tipo === 'BENEFICIARIO';
   }
 
+  async isColaborador(idUsuario: number): Promise<boolean> {
+    const usuario = await this.prisma.usuario.findUnique({
+      where: { id: idUsuario },
+    });
+
+    return usuario?.tipo === 'COLABORADOR';
+  }
+
   async isCadastrador(idUsuario: number): Promise<boolean> {
     const usuario = await this.prisma.usuario.findUnique({
       where: { id: idUsuario },
@@ -170,42 +232,11 @@ export class AuthService {
     return usuario?.tipo === 'CADASTRADOR';
   }
 
-  async updatePassword(
-    idUser: number,
-    passwordDto: updatePasswordDto,
-  ): Promise<{ access_token: string }> {
-
-    const user = await this.prisma.usuario.findUnique({
-      where: { id: idUser },
+  async isActive(idUsuario: number): Promise<boolean> {
+    const usuario = await this.prisma.usuario.findUnique({
+      where: { id: idUsuario },
     });
 
-    await argon.hash(passwordDto.currentPass);
-    if (!(await argon.verify(user.hash, passwordDto.currentPass))){
-      throw new BadRequestException('Incorrect password!')
-    }
-    
-    const newHash = await argon.hash(passwordDto.newPass);
-    if (await argon.verify(user.hash, passwordDto.newPass)) {
-      throw new BadRequestException('The new password cannot be the same as the old one!');
-    }
-
-    if (!(passwordDto.newPass === passwordDto.repeatNewPass)){
-      throw new BadRequestException("The passwords don't match!")
-    }
-    await this.prisma.usuario.update({
-      where: {
-        id: idUser,
-      },
-      data: {
-        hash: newHash,
-      },
-    });
-
-    const { access_token } = await this.signToken(user.id, user.tipo);
-
-    const response = {
-      access_token,
-    };
-    return response;
+    return usuario?.ativo;
   }
 }

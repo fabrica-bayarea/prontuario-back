@@ -37,8 +37,9 @@ export class CursoService {
     return this.prisma.curso.create({
       data: {
         nome: createCursoDto.nome,
-        turno: createCursoDto.turno,
+        descricao: createCursoDto.descricao,
         coordenador: createCursoDto.coordenador,
+        campus: createCursoDto.campus,
       },
     });
   }
@@ -66,8 +67,9 @@ export class CursoService {
       where: { id },
       data: {
         nome: updateCursoDto.nome,
-        turno: updateCursoDto.turno,
+        descricao: updateCursoDto.descricao,
         coordenador: updateCursoDto.coordenador,
+        campus: updateCursoDto.campus,
       },
     });
   }
@@ -88,7 +90,11 @@ export class CursoService {
   }
 
   async getAllCursos(): Promise<Curso[]> {
-    return this.prisma.curso.findMany({ include: { programas: true } });
+    return this.prisma.curso.findMany({
+      include: {
+        programas: true,
+      },
+    });
   }
 
   async deleteCurso(idUsuario: number, id: number): Promise<Curso> {

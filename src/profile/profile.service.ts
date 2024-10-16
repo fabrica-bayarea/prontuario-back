@@ -11,20 +11,25 @@ export class ProfileService {
       where: { id: id },
     });
 
+    if (!userProfile) {
+      throw new Error(`Usuário com ID ${id} não encontrado.`);
+    }
+
     const userData = {
       nome: userProfile.nome,
       sobrenome: userProfile.sobrenome,
       email: userProfile.email,
       telefone: userProfile.telefone,
-      cidade: userProfile.cidade,
       cep: userProfile.cep,
+      cidade: userProfile.cidade,
       endereco: userProfile.endereco,
+      nascimento: userProfile.nascimento,
+      genero: userProfile.genero,
+      cpf: userProfile.cpf,
       tipo: userProfile.tipo,
+      matricula: userProfile.matricula,
     };
 
-    if (!userProfile) {
-      throw new Error(`Usuário com ID ${id} não encontrado.`);
-    }
     return userData;
   }
 
@@ -47,19 +52,13 @@ export class ProfileService {
       cidade: updateProfileDto.cidade,
       endereco: updateProfileDto.endereco,
       cep: updateProfileDto.cep,
+      genero: updateProfileDto.genero,
+      matricula: updateProfileDto.matricula,
     };
 
     const updatedUser = await this.prisma.usuario.update({
       where: { id },
-      data: {
-        nome: userData.nome,
-        sobrenome: userData.sobrenome,
-        email: userData.email,
-        telefone: userData.telefone,
-        cidade: userData.cidade,
-        endereco: userData.endereco,
-        cep: userData.cep,
-      },
+      data: userData,
       select: {
         nome: true,
         sobrenome: true,
@@ -68,6 +67,11 @@ export class ProfileService {
         cidade: true,
         endereco: true,
         cep: true,
+        nascimento: true,
+        genero: true,
+        cpf: true,
+        tipo: true,
+        matricula: true,
       },
     });
     return updatedUser;
