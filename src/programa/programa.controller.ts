@@ -105,13 +105,53 @@ export class ProgramaController {
 
   @ApiOperation({
     summary:
+      'Operação de inscrever um beneficiário a um Programa por ID',
+    description:
+      'Inscreve o usuário logado no programa pelo ID do programa passado por parâmetro',
+  })
+  @ApiResponse({ status: 200, description: 'Inscrito no programa com sucesso!' })
+  @ApiResponse({ status: 404, description: 'Programa não encontrado' })
+  @Patch('/adicionar-beneficiario/:id')
+  async adicionarBeneficiarioPrograma(
+    @Request() req,
+    @Param('id', ParseIntPipe) idPrograma: number
+  ): Promise<Programa> {
+    const idUsuario = req.user.id;
+    return this.programaService.adicionarBeneficiarioPrograma(
+      idUsuario,
+      idPrograma
+    );
+  }
+
+  @ApiOperation({
+    summary:
+      'Operação de desinscrever um beneficiário de um Programa por ID',
+    description:
+      'Desinscreve o usuário logado do programa pelo ID do programa passado por parâmetro',
+  })
+  @ApiResponse({ status: 200, description: 'Desinscrito do programa com sucesso!' })
+  @ApiResponse({ status: 404, description: 'Programa não encontrado' })
+  @Patch('/remover-beneficiario/:id')
+  async removerBeneficiarioPrograma(
+    @Request() req,
+    @Param('id', ParseIntPipe) idPrograma: number
+  ): Promise<Programa> {
+    const idUsuario = req.user.id;
+    return this.programaService.removerBeneficiarioPrograma(
+      idUsuario,
+      idPrograma
+    );
+  }
+  
+  @ApiOperation({
+    summary:
       'Operação de inserção de um Curso relacionado a um Programa em banco de dados por ID',
     description:
       'Atualiza um Programa, atrelando a ele um Curso, pelo ID passado por parâmetro',
   })
   @ApiResponse({ status: 204, description: 'Programa atualizado com sucesso' })
   @ApiResponse({ status: 404, description: 'Programa não encontrado' })
-  @Patch('/adicionar/:id')
+  @Patch('/adicionar-curso/:id')
   async adicionarCursoPrograma(
     @Request() req,
     @Param('id', ParseIntPipe) id: number,
@@ -133,7 +173,7 @@ export class ProgramaController {
   })
   @ApiResponse({ status: 204, description: 'Curso removido com sucesso' })
   @ApiResponse({ status: 404, description: 'Curso não encontrado' })
-  @Patch('/remover/:id')
+  @Patch('/remover-curso/:id')
   async removerCursoPrograma(
     @Request() req,
     @Param('id', ParseIntPipe) id: number,

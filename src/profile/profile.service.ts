@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ProfileDto, UpdateProfileDto } from './profile.dto';
+import { Programa } from '@prisma/client';
 
 @Injectable()
 export class ProfileService {
@@ -75,5 +76,18 @@ export class ProfileService {
       },
     });
     return updatedUser;
+  }
+
+  async getProgramsParticipate(
+    id: number,
+  ): Promise<Programa[]> {
+    const programas = await this.prisma.usuario.findUnique({
+      where: { id },
+      include: {
+        programas: true
+      },
+    });
+
+    return programas.programas || [];
   }
 }

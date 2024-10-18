@@ -82,7 +82,10 @@ export class ProgramaService {
   }
 
   async getProgramaById(id: number): Promise<Programa> {
-    const programa = await this.prisma.programa.findUnique({ where: { id } });
+    const programa = await this.prisma.programa.findUnique({
+        where: { id },
+        include: { periodo_atendimentos: true },
+      });
 
     if (!programa) {
       throw new NotFoundException(`programa com ID ${id} não encontrado`);
@@ -126,6 +129,97 @@ export class ProgramaService {
         publico_alvo: updateProgramaDto.publico_alvo,
       },
     });
+  }
+
+  async deletePrograma( idUsuario: number, id: number ): Promise<Programa> {
+    const isAdministrator = await this.authService.isAdministrator(idUsuario);
+
+    if (!isAdministrator) {
+      throw new ForbiddenException('permissões insuficientes.');
+    }
+
+    const programa = await this.prisma.programa.findUnique({
+      where: { id },
+    });
+
+    if (!programa) {
+      throw new NotFoundException(`programa com ID ${id} não encontrado`);
+    }
+
+    await this.prisma.programa.update({
+      where: { id },
+      data: { usuarios: { disconnect: [] } },
+    });
+
+    await this.prisma.atendimento.deleteMany({
+      where: {
+        Vaga: {
+          Periodo_Atendimento: {
+            programaId: id
+          }
+        }
+      }
+    });
+
+    await this.prisma.vaga.deleteMany({
+      where: {
+        Periodo_Atendimento: {
+          programaId: id
+        }
+      }
+    });
+
+    await this.prisma.periodo_Atendimento.deleteMany({
+      where: { programaId: id },
+    });
+
+    return await this.prisma.programa.delete({ where: { id } });
+  }
+
+  async adicionarBeneficiarioPrograma(
+    idUsuario: number,
+    idPrograma: number,
+  ): Promise<Programa> {
+    const isAdministrator = await this.authService.isAdministrator(idUsuario);
+    const isBeneficiario = await this.authService.isBeneficiario(idUsuario);
+
+    if (!isAdministrator && !isBeneficiario) {
+      throw new ForbiddenException('permissões insuficientes.');
+    }
+
+    const programa = await this.prisma.programa.findUnique({ where: { id: idPrograma } });
+    if (!programa) {
+      throw new NotFoundException(`programa com ID ${idPrograma} não encontrado`);
+    }
+
+    return await this.prisma.programa.update({
+      where: { id: idPrograma },
+      data: { usuarios: { connect: { id: idUsuario } } },
+    });
+    
+  }
+
+  async removerBeneficiarioPrograma(
+    idUsuario: number,
+    idPrograma: number,
+  ): Promise<Programa> {
+    const isAdministrator = await this.authService.isAdministrator(idUsuario);
+    const isBeneficiario = await this.authService.isBeneficiario(idUsuario);
+
+    if (!isAdministrator && !isBeneficiario) {
+      throw new ForbiddenException('permissões insuficientes.');
+    }
+
+    const programa = await this.prisma.programa.findUnique({ where: { id: idPrograma } });
+    if (!programa) {
+      throw new NotFoundException(`programa com ID ${idPrograma} não encontrado`);
+    }
+
+    return await this.prisma.programa.update({
+      where: { id: idPrograma },
+      data: { usuarios: { disconnect: { id: idUsuario } } },
+    });
+    
   }
 
   async adicionarCursoPrograma(
@@ -202,23 +296,5 @@ export class ProgramaService {
         data: { cursos: { disconnect: { id: curso } } },
       });
     }
-  }
-
-  async deletePrograma(idUsuario: number, id: number): Promise<Programa> {
-    const isAdministrator = await this.authService.isAdministrator(idUsuario);
-
-    if (!isAdministrator) {
-      throw new ForbiddenException('permissões insuficientes.');
-    }
-
-    const programa = await this.prisma.programa.findUnique({
-      where: { id },
-    });
-
-    if (!programa) {
-      throw new NotFoundException(`programa com ID ${id} não encontrado`);
-    }
-
-    return await this.prisma.programa.delete({ where: { id } });
   }
 }
