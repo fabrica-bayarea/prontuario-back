@@ -82,7 +82,10 @@ export class ProgramaService {
   }
 
   async getProgramaById(id: number): Promise<Programa> {
-    const programa = await this.prisma.programa.findUnique({ where: { id } });
+    const programa = await this.prisma.programa.findUnique({
+        where: { id },
+        include: { periodo_atendimentos: true },
+      });
 
     if (!programa) {
       throw new NotFoundException(`programa com ID ${id} não encontrado`);
@@ -146,6 +149,24 @@ export class ProgramaService {
     await this.prisma.programa.update({
       where: { id },
       data: { usuarios: { disconnect: [] } },
+    });
+
+    await this.prisma.atendimento.deleteMany({
+      where: {
+        Vaga: {
+          Periodo_Atendimento: {
+            programaId: id
+          }
+        }
+      }
+    });
+
+    await this.prisma.vaga.deleteMany({
+      where: {
+        Periodo_Atendimento: {
+          programaId: id
+        }
+      }
     });
 
     await this.prisma.periodo_Atendimento.deleteMany({
