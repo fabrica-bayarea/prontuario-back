@@ -178,3 +178,28 @@ Abaixo temos uma lista de pessoas que participaram deste projeto ao longo dos an
 | arthur.rabel@outlook.com| Arthur Rabelo | Líder Técnico | 
 | jefferson.almeidaalves@gmail.com | Jefferson Almeida | Engenheiro Backend | 
 | georgesdc13@gmail.com | Georges do Carmo Pereira | Engenheiro Backend | 
+
+#Template de issues
+
+## Descrição do Problema
+
+[ Descreva aqui o problema]
+
+### Comportamento esperado
+
+[ Descreva aqui o comportamento que era esperado]
+
+### Comportamento Real
+
+[Descreva aqui o comportamento observado]
+
+### Passos para reproduzir 
+
+1. [descrever primeiro passo]
+2. [descreva o segundo passo]
+
+### Registro de Erro
+
+[Iclua logs ou mensagens de erro relevantes]
+
+### Possivel soluções/Sugestões
