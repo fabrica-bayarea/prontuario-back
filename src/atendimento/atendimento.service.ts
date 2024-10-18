@@ -58,13 +58,25 @@ export class AtendimentoService {
 
     const periodoAtendimento = await this.prisma.periodo_Atendimento.findUnique(
       {
-        where: { id: vaga.colaboradorId },
+        where: { id: vaga.periodoAtendimentoId },
       },
     );
+
+    if (!periodoAtendimento) {
+      throw new NotFoundException(
+        `Período de atendimento com id ${vaga.periodoAtendimentoId} não encontrado`,
+      );
+    }
 
     const programa = await this.prisma.programa.findUnique({
       where: { id: periodoAtendimento.programaId },
     });
+
+    if (!programa) {
+      throw new NotFoundException(
+        `Programa com id ${periodoAtendimento.programaId} não encontrado`,
+      );
+    }
 
     const response: AtendimentoResponse = {
       atendimento: {
