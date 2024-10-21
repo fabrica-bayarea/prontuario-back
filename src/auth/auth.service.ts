@@ -1,12 +1,14 @@
 import {
   BadRequestException,
   ForbiddenException,
+  HttpStatus,
   Injectable,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
+  forgotPasswordDto,
   SignInUsuarioDto,
   SignUpUsuarioDto,
   updatePasswordDto,
@@ -14,6 +16,8 @@ import {
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import * as argon from 'argon2';
 import { Usuario } from '@prisma/client';
+import * as nodemailer from 'nodemailer';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -21,7 +25,7 @@ export class AuthService {
     private prisma: PrismaService,
     private jwt: JwtService,
     private config: ConfigService,
-  ) {}
+  ) { }
 
   async signToken(
     idUsuario: number,
@@ -191,6 +195,49 @@ export class AuthService {
       access_token,
     };
     return response;
+  }
+
+  async forgotPassword(forgotPasswordDto: forgotPasswordDto) {
+    //BUSCA O EMAIL INFORMADO
+    const userEmail = await this.prisma.usuario.findUnique({
+      where: {
+        email: forgotPasswordDto.email
+      }
+    });
+    //SE NÃO ENCONTROU DA ERRO
+    if (!userEmail) {
+      throw new BadRequestException("User not found")
+    }
+    //CREDENCIAIS DO MAILTRAP
+    const transporter = nodemailer.createTransport({
+      host: "sandbox.smtp.mailtrap.io",
+      port: 2525,
+      auth: {
+        user: "bacfc29c9848b4",
+        pass: "03c2a2e836262b"
+      },
+    });
+    //NOVA SENHA ALEATÓRIA
+    const newPassword = crypto.randomInt(10000000).toString();
+    //PAYLOAD DO EMAIL COM A NOVA SENHA
+    await transporter.sendMail({
+      from: "Administrador <0da4af747a-2c981c@inbox.mailtrap.io>",
+      to: forgotPasswordDto.email,
+      subject: "Recuperação de senha",
+      text: 'Olá, sua nova senha para acessar o sistema é: ' + newPassword,
+      html: '<p>Olá, sua nova senha para acessar o sistema é: ' + newPassword + '</p>',
+    });
+    //ENCRIPTANDO A SENHA
+    const newPasswordHash = await argon.hash(newPassword);
+    //SALVANDO A NOVA SENHA ENCRIPTADA NO BANCO
+    await this.prisma.usuario.update({
+      where: {
+        email: forgotPasswordDto.email
+      },
+      data: {
+        hash: newPasswordHash
+      }
+    })
   }
 
   async disableUser(id: number): Promise<void> {

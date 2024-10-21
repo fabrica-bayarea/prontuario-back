@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
+  forgotPasswordDto,
   SignInUsuarioDto,
   SignUpUsuarioDto,
   updatePasswordDto,
@@ -70,5 +71,16 @@ export class AuthController {
   disableUser(@Request() req) {
     const idUser = req.user.id;
     return this.authService.disableUser(idUser);
+  }
+
+  @ApiOperation({
+    summary: 'Cria uma nova senha para o usuário e envia no email cadastrado',
+    description: 'Gera uma nova senha para o usuário que esqueceu a senha e salva no banco, em seguida envia a nova senha no email cadastrado.',
+  })
+  @ApiResponse({ status: 200, description: 'Email enviado com sucesso' })
+  @ApiResponse({ status: 401, description: 'Falha ao enviar o email' })
+  @Patch('/forgot-password')
+  forgotPassword(@Body() forgotPasswordDto:forgotPasswordDto){
+    return this.authService.forgotPassword(forgotPasswordDto)
   }
 }
