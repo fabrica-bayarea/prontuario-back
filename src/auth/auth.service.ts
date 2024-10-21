@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   ForbiddenException,
-  HttpStatus,
   Injectable,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -210,18 +209,19 @@ export class AuthService {
     }
     //CREDENCIAIS DO MAILTRAP
     const transporter = nodemailer.createTransport({
-      host: "sandbox.smtp.mailtrap.io",
-      port: 2525,
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
       auth: {
-        user: "bacfc29c9848b4",
-        pass: "03c2a2e836262b"
+        user: "prontuario.iesb@gmail.com",
+        pass: "heypjlsvheyprida  "
       },
     });
     //NOVA SENHA ALEATÓRIA
     const newPassword = crypto.randomInt(10000000).toString();
     //PAYLOAD DO EMAIL COM A NOVA SENHA
     await transporter.sendMail({
-      from: "Administrador <0da4af747a-2c981c@inbox.mailtrap.io>",
+      from: "Administrador <demoemail.com>",
       to: forgotPasswordDto.email,
       subject: "Recuperação de senha",
       text: 'Olá, sua nova senha para acessar o sistema é: ' + newPassword,

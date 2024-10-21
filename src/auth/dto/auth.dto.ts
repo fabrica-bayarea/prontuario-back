@@ -123,6 +123,5 @@ export class updatePasswordDto {
 export class forgotPasswordDto {
   @ApiProperty({ example: 'cleber.guimaraes@email.com' })
   @IsEmail({}, { message: 'email deve ser um email válido' })
-  @IsOptional()
   email?: string;
 }
