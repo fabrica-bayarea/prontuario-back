@@ -119,3 +119,9 @@ export class updatePasswordDto {
   @IsString({ message: 'senha deve ser uma string' })
   repeat_new_pass: string;
 }
+
+export class forgotPasswordDto {
+  @ApiProperty({ example: 'cleber.guimaraes@email.com' })
+  @IsEmail({}, { message: 'email deve ser um email válido' })
+  email?: string;
+}

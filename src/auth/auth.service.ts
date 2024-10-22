@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
+  forgotPasswordDto,
   SignInUsuarioDto,
   SignUpUsuarioDto,
   updatePasswordDto,
@@ -14,6 +15,9 @@ import {
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import * as argon from 'argon2';
 import { Usuario } from '@prisma/client';
+import * as nodemailer from 'nodemailer';
+import * as crypto from 'crypto';
+import { env } from 'process';
 
 @Injectable()
 export class AuthService {
@@ -21,7 +25,7 @@ export class AuthService {
     private prisma: PrismaService,
     private jwt: JwtService,
     private config: ConfigService,
-  ) {}
+  ) { }
 
   async signToken(
     idUsuario: number,
@@ -191,6 +195,49 @@ export class AuthService {
       access_token,
     };
     return response;
+  }
+
+  async forgotPassword(forgotPasswordDto: forgotPasswordDto) {
+
+    const userEmail = await this.prisma.usuario.findUnique({
+      where: {
+        email: forgotPasswordDto.email
+      }
+    });
+
+    if (!userEmail) {
+      throw new BadRequestException("User not found")
+    }
+
+    const transporter = nodemailer.createTransport({
+      host: env.HOST,
+      port: 465,
+      auth: {
+        user: env.EMAIL,
+        pass: env.PASS
+      },
+    });
+
+    const newPassword = crypto.randomInt(10000000).toString();
+
+    await transporter.sendMail({
+      from: "Administrador <demoemail.com>",
+      to: forgotPasswordDto.email,
+      subject: "Recuperação de senha",
+      text: 'Olá, sua nova senha para acessar o sistema é: ' + newPassword,
+      html: '<p>Olá, sua nova senha para acessar o sistema é: ' + newPassword + '</p>',
+    });
+
+    const newPasswordHash = await argon.hash(newPassword);
+
+    await this.prisma.usuario.update({
+      where: {
+        email: forgotPasswordDto.email
+      },
+      data: {
+        hash: newPasswordHash
+      }
+    })
   }
 
   async disableUser(id: number): Promise<void> {
