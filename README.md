@@ -116,6 +116,10 @@ JWT_SECRET="seu segredo"
 POSTGRES_USER=usuario_postgres
 POSTGRES_PASSWORD=senha_postgres
 POSTGRES_DB=db_postgres
+
+HOST="smtp.gmail.com"
+EMAIL="prontuario.iesb@gmail.com"
+PASS="heypjlsvheyprida"
 ```
 
 > [!IMPORTANT]  

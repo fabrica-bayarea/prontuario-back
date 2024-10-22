@@ -17,6 +17,7 @@ import * as argon from 'argon2';
 import { Usuario } from '@prisma/client';
 import * as nodemailer from 'nodemailer';
 import * as crypto from 'crypto';
+import { env } from 'process';
 
 @Injectable()
 export class AuthService {
@@ -197,29 +198,28 @@ export class AuthService {
   }
 
   async forgotPassword(forgotPasswordDto: forgotPasswordDto) {
-    //BUSCA O EMAIL INFORMADO
+
     const userEmail = await this.prisma.usuario.findUnique({
       where: {
         email: forgotPasswordDto.email
       }
     });
-    //SE NÃO ENCONTROU DA ERRO
+
     if (!userEmail) {
       throw new BadRequestException("User not found")
     }
-    //CREDENCIAIS DO MAILTRAP
+
     const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
+      host: env.HOST,
       port: 465,
-      secure: true,
       auth: {
-        user: "prontuario.iesb@gmail.com",
-        pass: "heypjlsvheyprida  "
+        user: env.EMAIL,
+        pass: env.PASS
       },
     });
-    //NOVA SENHA ALEATÓRIA
+
     const newPassword = crypto.randomInt(10000000).toString();
-    //PAYLOAD DO EMAIL COM A NOVA SENHA
+
     await transporter.sendMail({
       from: "Administrador <demoemail.com>",
       to: forgotPasswordDto.email,
@@ -227,9 +227,9 @@ export class AuthService {
       text: 'Olá, sua nova senha para acessar o sistema é: ' + newPassword,
       html: '<p>Olá, sua nova senha para acessar o sistema é: ' + newPassword + '</p>',
     });
-    //ENCRIPTANDO A SENHA
+
     const newPasswordHash = await argon.hash(newPassword);
-    //SALVANDO A NOVA SENHA ENCRIPTADA NO BANCO
+
     await this.prisma.usuario.update({
       where: {
         email: forgotPasswordDto.email
