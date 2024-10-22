@@ -89,8 +89,21 @@ export class CursoService {
     return curso;
   }
 
-  async getAllCursos(): Promise<Curso[]> {
+  async getAllCursos(take: string, skip: string, filter: string): Promise<Curso[]> {
+    const takeNumber = parseInt(take);
+    const skipNumber = parseInt(skip);
+    const page = skipNumber * takeNumber;
     return this.prisma.curso.findMany({
+      skip: page,
+      take: takeNumber,
+      where:{
+        nome:{
+          contains: filter
+        },
+      },
+      orderBy: {
+        nome: 'asc'
+      },
       include: {
         programas: true,
       },
