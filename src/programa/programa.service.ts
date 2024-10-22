@@ -75,8 +75,21 @@ export class ProgramaService {
     }
   }
 
-  async getAllProgramas(): Promise<Programa[]> {
+  async getAllProgramas(take: string, skip: string, filter: string): Promise<Programa[]> {
+    const takeNumber = parseInt(take);
+    const skipNumber = parseInt(skip);
+    const page = skipNumber * takeNumber;
     return this.prisma.programa.findMany({
+      skip: page,
+      take: takeNumber,
+      where:{
+        nome:{
+          contains: filter
+        },
+      },
+      orderBy: {
+        nome: 'asc'
+      },
       include: { cursos: true },
     });
   }

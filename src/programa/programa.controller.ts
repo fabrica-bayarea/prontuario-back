@@ -54,9 +54,13 @@ export class ProgramaController {
   })
   @ApiResponse({ status: 200, description: 'Programas listados com sucesso' })
   @ApiResponse({ status: 400, description: 'Bad request' })
-  @Get()
-  async getAllProgramas(): Promise<Programa[]> {
-    return this.programaService.getAllProgramas();
+  @Get('take/:take/skip/:skip/:filter?')
+  async getAllProgramas(
+    @Param('take') take: string,
+    @Param('skip') skip: string,
+    @Param('filter') filter:string
+  ): Promise<Programa[]> {
+    return this.programaService.getAllProgramas(take, skip, filter);
   }
 
   @ApiOperation({

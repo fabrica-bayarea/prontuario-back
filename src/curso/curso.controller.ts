@@ -44,9 +44,13 @@ export class CursoController {
   })
   @ApiResponse({ status: 200, description: 'Cursos listados com sucesso' })
   @ApiResponse({ status: 400, description: 'Bad request' })
-  @Get()
-  async getAllCursos(): Promise<Curso[]> {
-    return this.cursoService.getAllCursos();
+  @Get('take/:take/skip/:skip/:filter?')
+  async getAllCursos(
+    @Param('take') take: string,
+    @Param('skip') skip: string,
+    @Param('filter') filter:string
+  ): Promise<Curso[]> {
+    return this.cursoService.getAllCursos(take, skip, filter);
   }
 
   @ApiOperation({
