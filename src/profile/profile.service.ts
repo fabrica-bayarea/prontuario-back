@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ProfileDto, UpdateProfileDto } from './profile.dto';
-import { Programa } from '@prisma/client';
+import { Program } from '@prisma/client';
 
 @Injectable()
 export class ProfileService {
   constructor(private prisma: PrismaService) {}
 
   async getUserProfile(id: number): Promise<ProfileDto> {
-    const userProfile = await this.prisma.usuario.findUnique({
+    const userProfile = await this.prisma.user.findUnique({
       where: { id: id },
     });
 
@@ -17,18 +17,18 @@ export class ProfileService {
     }
 
     const userData = {
-      nome: userProfile.nome,
-      sobrenome: userProfile.sobrenome,
+      firstName: userProfile.firstName,
+      lastName: userProfile.lastName,
       email: userProfile.email,
-      telefone: userProfile.telefone,
+      phone: userProfile.phone,
       cep: userProfile.cep,
-      cidade: userProfile.cidade,
-      endereco: userProfile.endereco,
-      nascimento: userProfile.nascimento,
-      genero: userProfile.genero,
+      city: userProfile.city,
+      address: userProfile.address,
+      birthDate: userProfile.birthDate,
+      gender: userProfile.gender,
       cpf: userProfile.cpf,
-      tipo: userProfile.tipo,
-      matricula: userProfile.matricula,
+      userType: userProfile.userType,
+      registration: userProfile.registration,
     };
 
     return userData;
@@ -38,7 +38,7 @@ export class ProfileService {
     id: number,
     updateProfileDto: UpdateProfileDto,
   ): Promise<UpdateProfileDto> {
-    const userProfile = await this.prisma.usuario.findUnique({
+    const userProfile = await this.prisma.user.findUnique({
       where: { id: id },
     });
     if (!userProfile) {
@@ -46,48 +46,46 @@ export class ProfileService {
     }
 
     const userData = {
-      nome: updateProfileDto.nome,
-      sobrenome: updateProfileDto.sobrenome,
+      firstName: updateProfileDto.firstName,
+      lastName: updateProfileDto.lastName,
       email: updateProfileDto.email,
-      telefone: updateProfileDto.telefone,
-      cidade: updateProfileDto.cidade,
-      endereco: updateProfileDto.endereco,
+      phone: updateProfileDto.phone,
+      city: updateProfileDto.city,
+      address: updateProfileDto.address,
       cep: updateProfileDto.cep,
-      genero: updateProfileDto.genero,
-      matricula: updateProfileDto.matricula,
+      gender: updateProfileDto.gender,
+      registration: updateProfileDto.registration,
     };
 
-    const updatedUser = await this.prisma.usuario.update({
+    const updatedUser = await this.prisma.user.update({
       where: { id },
       data: userData,
       select: {
-        nome: true,
-        sobrenome: true,
+        firstName: true,
+        lastName: true,
         email: true,
-        telefone: true,
-        cidade: true,
-        endereco: true,
+        phone: true,
+        city: true,
+        address: true,
         cep: true,
-        nascimento: true,
-        genero: true,
+        birthDate: true,
+        gender: true,
         cpf: true,
-        tipo: true,
-        matricula: true,
+        userType: true,
+        registration: true,
       },
     });
     return updatedUser;
   }
 
-  async getProgramsParticipate(
-    id: number,
-  ): Promise<Programa[]> {
-    const programas = await this.prisma.usuario.findUnique({
+  async getProgramsParticipate(id: number): Promise<Program[]> {
+    const program = await this.prisma.user.findUnique({
       where: { id },
       include: {
-        programas: true
+        program: true,
       },
     });
 
-    return programas.programas || [];
+    return program.program || [];
   }
 }

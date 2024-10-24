@@ -11,7 +11,7 @@ import {
   CursoProgramaDto,
   UpdateProgramaDto,
 } from './programa.dto';
-import { Programa } from '@prisma/client';
+import { Program } from '@prisma/client';
 import { isInt, isString } from 'class-validator';
 
 @Injectable()
@@ -24,48 +24,48 @@ export class ProgramaService {
   async createPrograma(
     idUsuario: number,
     createProgramaDto: CreateProgramaDto,
-  ): Promise<Programa> {
+  ): Promise<Program> {
     const isAdministrator = await this.authService.isAdministrator(idUsuario);
 
     if (!isAdministrator) {
       throw new ForbiddenException('permissões insuficientes.');
     }
 
-    const { nome, curso, descricao, publico_alvo } = createProgramaDto;
+    const { name, course, description, targetAudience } = createProgramaDto;
     let exists: any;
 
-    if (isString(curso)) {
-      exists = await this.prisma.curso.findUnique({ where: { nome: curso } });
+    if (isString(course)) {
+      exists = await this.prisma.course.findUnique({ where: { name: course } });
 
       if (!exists) {
-        throw new BadRequestException('ID ou nome do curso incorreto.');
+        throw new BadRequestException('ID ou name do course incorreto.');
       }
 
-      return await this.prisma.programa.create({
+      return await this.prisma.program.create({
         data: {
-          nome,
-          descricao,
-          publico_alvo,
-          cursos: {
+          name,
+          description,
+          targetAudience,
+          course: {
             connect: {
               id: exists.id,
             },
           },
         },
       });
-    } else if (isInt(curso)) {
-      exists = await this.prisma.curso.findUnique({ where: { id: curso } });
+    } else if (isInt(course)) {
+      exists = await this.prisma.course.findUnique({ where: { id: course } });
 
       if (!exists) {
-        throw new BadRequestException('ID ou nome do curso incorreto.');
+        throw new BadRequestException('ID ou name do course incorreto.');
       }
 
-      return await this.prisma.programa.create({
+      return await this.prisma.program.create({
         data: {
-          nome,
-          descricao,
-          publico_alvo,
-          cursos: {
+          name,
+          description,
+          targetAudience,
+          course: {
             connect: {
               id: exists.id,
             },
@@ -75,111 +75,111 @@ export class ProgramaService {
     }
   }
 
-  async getAllProgramas(): Promise<Programa[]> {
-    return this.prisma.programa.findMany({
-      include: { cursos: true },
+  async getAllProgramas(): Promise<Program[]> {
+    return this.prisma.program.findMany({
+      include: { course: true },
     });
   }
 
-  async getProgramaById(id: number): Promise<Programa> {
-    const programa = await this.prisma.programa.findUnique({
-        where: { id },
-        include: { periodo_atendimentos: true },
-      });
+  async getProgramaById(id: number): Promise<Program> {
+    const program = await this.prisma.program.findUnique({
+      where: { id },
+      include: { appointmentPeriod: true },
+    });
 
-    if (!programa) {
-      throw new NotFoundException(`programa com ID ${id} não encontrado`);
+    if (!program) {
+      throw new NotFoundException(`program com ID ${id} não encontrado`);
     }
 
-    return programa;
+    return program;
   }
 
-  async filterProgramasByName(name: string): Promise<Programa[]> {
-    const programas = await this.prisma.programa.findMany({
+  async filterProgramasByName(name: string): Promise<Program[]> {
+    const program = await this.prisma.program.findMany({
       where: {
-        nome: {
+        name: {
           contains: name,
           mode: 'insensitive',
         },
       },
     });
 
-    return programas;
+    return program;
   }
 
   async updatePrograma(
     idUsuario: number,
     id: number,
     updateProgramaDto: UpdateProgramaDto,
-  ): Promise<Programa> {
+  ): Promise<Program> {
     const isAdministrator = await this.authService.isAdministrator(idUsuario);
     if (!isAdministrator) {
       throw new ForbiddenException('permissões insuficientes.');
     }
-    const programa = await this.prisma.programa.findUnique({ where: { id } });
-    if (!programa) {
-      throw new NotFoundException(`programa com ID ${id} não encontrado`);
+    const program = await this.prisma.program.findUnique({ where: { id } });
+    if (!program) {
+      throw new NotFoundException(`program com ID ${id} não encontrado`);
     }
 
-    return await this.prisma.programa.update({
+    return await this.prisma.program.update({
       where: { id },
       data: {
-        nome: updateProgramaDto.nome,
-        descricao: updateProgramaDto.descricao,
-        publico_alvo: updateProgramaDto.publico_alvo,
+        name: updateProgramaDto.name,
+        description: updateProgramaDto.description,
+        targetAudience: updateProgramaDto.targetAudience,
       },
     });
   }
 
-  async deletePrograma( idUsuario: number, id: number ): Promise<Programa> {
+  async deletePrograma(idUsuario: number, id: number): Promise<Program> {
     const isAdministrator = await this.authService.isAdministrator(idUsuario);
 
     if (!isAdministrator) {
       throw new ForbiddenException('permissões insuficientes.');
     }
 
-    const programa = await this.prisma.programa.findUnique({
+    const program = await this.prisma.program.findUnique({
       where: { id },
     });
 
-    if (!programa) {
-      throw new NotFoundException(`programa com ID ${id} não encontrado`);
+    if (!program) {
+      throw new NotFoundException(`program com ID ${id} não encontrado`);
     }
 
-    await this.prisma.programa.update({
+    await this.prisma.program.update({
       where: { id },
-      data: { usuarios: { disconnect: [] } },
+      data: { user: { disconnect: [] } },
     });
 
-    await this.prisma.atendimento.deleteMany({
+    await this.prisma.appointment.deleteMany({
       where: {
-        Vaga: {
-          Periodo_Atendimento: {
-            programaId: id
-          }
-        }
-      }
+        Slot: {
+          AppointmentPeriod: {
+            programId: id,
+          },
+        },
+      },
     });
 
-    await this.prisma.vaga.deleteMany({
+    await this.prisma.slot.deleteMany({
       where: {
-        Periodo_Atendimento: {
-          programaId: id
-        }
-      }
+        AppointmentPeriod: {
+          programId: id,
+        },
+      },
     });
 
-    await this.prisma.periodo_Atendimento.deleteMany({
-      where: { programaId: id },
+    await this.prisma.appointmentPeriod.deleteMany({
+      where: { programId: id },
     });
 
-    return await this.prisma.programa.delete({ where: { id } });
+    return await this.prisma.program.delete({ where: { id } });
   }
 
   async adicionarBeneficiarioPrograma(
     idUsuario: number,
     idPrograma: number,
-  ): Promise<Programa> {
+  ): Promise<Program> {
     const isAdministrator = await this.authService.isAdministrator(idUsuario);
     const isBeneficiario = await this.authService.isBeneficiario(idUsuario);
 
@@ -187,22 +187,25 @@ export class ProgramaService {
       throw new ForbiddenException('permissões insuficientes.');
     }
 
-    const programa = await this.prisma.programa.findUnique({ where: { id: idPrograma } });
-    if (!programa) {
-      throw new NotFoundException(`programa com ID ${idPrograma} não encontrado`);
+    const program = await this.prisma.program.findUnique({
+      where: { id: idPrograma },
+    });
+    if (!program) {
+      throw new NotFoundException(
+        `program com ID ${idPrograma} não encontrado`,
+      );
     }
 
-    return await this.prisma.programa.update({
+    return await this.prisma.program.update({
       where: { id: idPrograma },
-      data: { usuarios: { connect: { id: idUsuario } } },
+      data: { user: { connect: { id: idUsuario } } },
     });
-    
   }
 
   async removerBeneficiarioPrograma(
     idUsuario: number,
     idPrograma: number,
-  ): Promise<Programa> {
+  ): Promise<Program> {
     const isAdministrator = await this.authService.isAdministrator(idUsuario);
     const isBeneficiario = await this.authService.isBeneficiario(idUsuario);
 
@@ -210,52 +213,55 @@ export class ProgramaService {
       throw new ForbiddenException('permissões insuficientes.');
     }
 
-    const programa = await this.prisma.programa.findUnique({ where: { id: idPrograma } });
-    if (!programa) {
-      throw new NotFoundException(`programa com ID ${idPrograma} não encontrado`);
+    const program = await this.prisma.program.findUnique({
+      where: { id: idPrograma },
+    });
+    if (!program) {
+      throw new NotFoundException(
+        `program com ID ${idPrograma} não encontrado`,
+      );
     }
 
-    return await this.prisma.programa.update({
+    return await this.prisma.program.update({
       where: { id: idPrograma },
-      data: { usuarios: { disconnect: { id: idUsuario } } },
+      data: { user: { disconnect: { id: idUsuario } } },
     });
-    
   }
 
   async adicionarCursoPrograma(
     idUsuario: number,
     id: number,
     cursoProgramaDto: CursoProgramaDto,
-  ): Promise<Programa> {
+  ): Promise<Program> {
     const isAdministrator = await this.authService.isAdministrator(idUsuario);
     if (!isAdministrator) {
       throw new ForbiddenException('permissões insuficientes.');
     }
-    const programa = await this.prisma.programa.findUnique({ where: { id } });
-    if (!programa) {
-      throw new NotFoundException(`programa com ID ${id} não encontrado`);
+    const program = await this.prisma.program.findUnique({ where: { id } });
+    if (!program) {
+      throw new NotFoundException(`program com ID ${id} não encontrado`);
     }
 
-    const { curso } = cursoProgramaDto;
+    const { course } = cursoProgramaDto;
     let exists: any;
 
-    if (isString(curso)) {
-      exists = await this.prisma.curso.findUnique({ where: { nome: curso } });
+    if (isString(course)) {
+      exists = await this.prisma.course.findUnique({ where: { name: course } });
       if (!exists) {
-        throw new BadRequestException('ID ou nome do curso incorreto.');
+        throw new BadRequestException('ID ou name do course incorreto.');
       }
-      return await this.prisma.programa.update({
+      return await this.prisma.program.update({
         where: { id },
-        data: { cursos: { connect: { nome: curso } } },
+        data: { course: { connect: { name: course } } },
       });
-    } else if (isInt(curso)) {
-      exists = await this.prisma.curso.findUnique({ where: { id: curso } });
+    } else if (isInt(course)) {
+      exists = await this.prisma.course.findUnique({ where: { id: course } });
       if (!exists) {
-        throw new BadRequestException('ID ou nome do curso incorreto.');
+        throw new BadRequestException('ID ou name do course incorreto.');
       }
-      return await this.prisma.programa.update({
+      return await this.prisma.program.update({
         where: { id },
-        data: { cursos: { connect: { id: curso } } },
+        data: { course: { connect: { id: course } } },
       });
     }
   }
@@ -264,36 +270,36 @@ export class ProgramaService {
     idUsuario: number,
     id: number,
     cursoProgramaDto: CursoProgramaDto,
-  ): Promise<Programa> {
+  ): Promise<Program> {
     const isAdministrator = await this.authService.isAdministrator(idUsuario);
     if (!isAdministrator) {
       throw new ForbiddenException('permissões insuficientes.');
     }
-    const programa = await this.prisma.programa.findUnique({ where: { id } });
-    if (!programa) {
-      throw new NotFoundException(`programa com ID ${id} não encontrado`);
+    const program = await this.prisma.program.findUnique({ where: { id } });
+    if (!program) {
+      throw new NotFoundException(`program com ID ${id} não encontrado`);
     }
 
-    const { curso } = cursoProgramaDto;
+    const { course } = cursoProgramaDto;
     let exists: any;
 
-    if (isString(curso)) {
-      exists = await this.prisma.curso.findUnique({ where: { nome: curso } });
+    if (isString(course)) {
+      exists = await this.prisma.course.findUnique({ where: { name: course } });
       if (!exists) {
-        throw new BadRequestException('ID ou nome do curso incorreto.');
+        throw new BadRequestException('ID ou name do course incorreto.');
       }
-      return await this.prisma.programa.update({
+      return await this.prisma.program.update({
         where: { id },
-        data: { cursos: { disconnect: { nome: curso } } },
+        data: { course: { disconnect: { name: course } } },
       });
-    } else if (isInt(curso)) {
-      exists = await this.prisma.curso.findUnique({ where: { id: curso } });
+    } else if (isInt(course)) {
+      exists = await this.prisma.course.findUnique({ where: { id: course } });
       if (!exists) {
-        throw new BadRequestException('ID ou nome do curso incorreto.');
+        throw new BadRequestException('ID ou name do course incorreto.');
       }
-      return await this.prisma.programa.update({
+      return await this.prisma.program.update({
         where: { id },
-        data: { cursos: { disconnect: { id: curso } } },
+        data: { course: { disconnect: { id: course } } },
       });
     }
   }

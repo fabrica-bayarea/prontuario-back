@@ -13,7 +13,7 @@ import {
 } from './dto/auth.dto';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import * as argon from 'argon2';
-import { Usuario } from '@prisma/client';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -25,11 +25,11 @@ export class AuthService {
 
   async signToken(
     idUsuario: number,
-    tipo: 'ADMINISTRADOR' | 'CADASTRADOR' | 'COLABORADOR' | 'BENEFICIARIO',
+    userType: 'ADMINISTRATOR' | 'REGISTRAR' | 'COLLABORATOR' | 'BENEFICIARY',
   ): Promise<{ access_token: string }> {
     const payload = {
       sub: idUsuario,
-      tipo,
+      userType,
     };
 
     const token = await this.jwt.signAsync(payload, {
@@ -45,7 +45,7 @@ export class AuthService {
     const hash = await argon.hash(dto.senha);
     try {
       const response = await this.prisma.$transaction(async prisma => {
-        const existingUser = await prisma.usuario.findFirst({
+        const existingUser = await prisma.user.findFirst({
           where: {
             OR: [{ email: dto.email }, { cpf: dto.cpf }],
           },
@@ -55,45 +55,45 @@ export class AuthService {
           throw new ForbiddenException('Credenciais tomadas');
         }
 
-        const hasAdmin = await prisma.usuario.findUnique({
+        const hasAdmin = await prisma.user.findUnique({
           where: { id: 1 },
         });
 
         const dadosUsuario: any = {
-          nome: dto.nome,
-          sobrenome: dto.sobrenome,
+          firstName: dto.firstName,
+          lastName: dto.lastName,
           email: dto.email,
           cpf: dto.cpf,
-          tipo: !hasAdmin ? 'ADMINISTRADOR' : 'BENEFICIARIO',
-          cidade: dto.cidade,
+          userType: !hasAdmin ? 'ADMINISTRATOR' : 'BENEFICIARY',
+          city: dto.city,
           cep: dto.cep,
-          endereco: dto.endereco,
-          nascimento: new Date(dto.nascimento),
-          genero: dto.genero,
+          address: dto.address,
+          birthDate: new Date(dto.birthDate),
+          gender: dto.gender,
           hash: hash,
-          matricula: dto.matricula,
+          registration: dto.registration,
         };
 
-        if (dto.telefone) {
-          dadosUsuario.telefone = dto.telefone;
+        if (dto.phone) {
+          dadosUsuario.phone = dto.phone;
         }
 
-        const usuario = await prisma.usuario.create({
+        const user = await prisma.user.create({
           data: dadosUsuario,
         });
 
-        delete usuario.hash;
+        delete user.hash;
 
-        const { access_token } = await this.signToken(usuario.id, usuario.tipo);
+        const { access_token } = await this.signToken(user.id, user.userType);
         return {
           access_token,
-          usuario: {
-            id: usuario.id,
-            nome: usuario.nome,
-            sobrenome: usuario.sobrenome,
-            cpf: usuario.cpf,
-            email: usuario.email,
-            tipo: usuario.tipo,
+          user: {
+            id: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            cpf: user.cpf,
+            email: user.email,
+            userType: user.userType,
           },
         };
       });
@@ -111,43 +111,43 @@ export class AuthService {
 
   async signInUsuario(
     dto: SignInUsuarioDto,
-  ): Promise<{ access_token: string; usuario: any } | never> {
+  ): Promise<{ access_token: string; user: any } | never> {
     if (!dto.cpf && !dto.email) {
       throw new BadRequestException('É necessário fornecer CPF ou email.');
     }
 
-    let usuario: Usuario;
+    let user: User;
 
     if (dto.cpf) {
-      usuario = await this.prisma.usuario.findUnique({
+      user = await this.prisma.user.findUnique({
         where: { cpf: dto.cpf },
       });
     } else if (dto.email) {
-      usuario = await this.prisma.usuario.findUnique({
+      user = await this.prisma.user.findUnique({
         where: { email: dto.email },
       });
     }
 
-    if (!usuario) throw new ForbiddenException('Credenciais inválidas');
+    if (!user) throw new ForbiddenException('Credenciais inválidas');
 
-    const senhaCorreta = await argon.verify(usuario.hash, dto.senha);
+    const senhaCorreta = await argon.verify(user.hash, dto.senha);
 
     if (!senhaCorreta) throw new ForbiddenException('Credenciais incorretas');
 
-    const isActive = await this.isActive(usuario.id);
+    const isActive = await this.isActive(user.id);
 
-    if (!isActive) throw new ForbiddenException('Usuario desativado');
+    if (!isActive) throw new ForbiddenException('User desativado');
 
-    const { access_token } = await this.signToken(usuario.id, usuario.tipo);
+    const { access_token } = await this.signToken(user.id, user.userType);
     const response = {
       access_token,
-      usuario: {
-        id: usuario.id,
-        nome: usuario.nome,
-        sobrenome: usuario.sobrenome,
-        cpf: usuario.cpf,
-        email: usuario.email,
-        tipo: usuario.tipo,
+      user: {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        cpf: user.cpf,
+        email: user.email,
+        userType: user.userType,
       },
     };
     return response;
@@ -157,7 +157,7 @@ export class AuthService {
     idUser: number,
     passwordDto: updatePasswordDto,
   ): Promise<{ access_token: string }> {
-    const user = await this.prisma.usuario.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { id: idUser },
     });
 
@@ -176,7 +176,7 @@ export class AuthService {
     if (!(passwordDto.new_pass === passwordDto.repeat_new_pass)) {
       throw new BadRequestException("The passwords don't match!");
     }
-    await this.prisma.usuario.update({
+    await this.prisma.user.update({
       where: {
         id: idUser,
       },
@@ -185,7 +185,7 @@ export class AuthService {
       },
     });
 
-    const { access_token } = await this.signToken(user.id, user.tipo);
+    const { access_token } = await this.signToken(user.id, user.userType);
 
     const response = {
       access_token,
@@ -194,49 +194,49 @@ export class AuthService {
   }
 
   async disableUser(id: number): Promise<void> {
-    await this.prisma.usuario.update({
+    await this.prisma.user.update({
       where: { id },
-      data: { ativo: false },
+      data: { active: false },
     });
   }
 
   async isAdministrator(idUsuario: number): Promise<boolean> {
-    const usuario = await this.prisma.usuario.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { id: idUsuario },
     });
 
-    return usuario?.tipo === 'ADMINISTRADOR';
+    return user?.userType === 'ADMINISTRATOR';
   }
 
   async isBeneficiario(idUsuario: number): Promise<boolean> {
-    const usuario = await this.prisma.usuario.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { id: idUsuario },
     });
 
-    return usuario?.tipo === 'BENEFICIARIO';
+    return user?.userType === 'BENEFICIARY';
   }
 
   async isColaborador(idUsuario: number): Promise<boolean> {
-    const usuario = await this.prisma.usuario.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { id: idUsuario },
     });
 
-    return usuario?.tipo === 'COLABORADOR';
+    return user?.userType === 'COLLABORATOR';
   }
 
   async isCadastrador(idUsuario: number): Promise<boolean> {
-    const usuario = await this.prisma.usuario.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { id: idUsuario },
     });
 
-    return usuario?.tipo === 'CADASTRADOR';
+    return user?.userType === 'REGISTRAR';
   }
 
   async isActive(idUsuario: number): Promise<boolean> {
-    const usuario = await this.prisma.usuario.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { id: idUsuario },
     });
 
-    return usuario?.ativo;
+    return user?.active;
   }
 }

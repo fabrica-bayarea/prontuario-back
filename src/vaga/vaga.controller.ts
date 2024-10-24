@@ -6,19 +6,19 @@ import { VagaResponse, CreateVagaDto } from './vaga.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Operações de manutenção de disponibilidades dos colaboradores')
-@Controller('vaga')
+@Controller('slot')
 @UseGuards(JwtGuard)
 export class VagaController {
   constructor(private readonly vagaService: VagaService) {}
 
   @ApiOperation({
-    summary: 'Registra uma nova vaga',
+    summary: 'Registra uma nova slot',
     description:
-      'Colaborador registra disponibilidade para atendimento em um período de atendimento criando uma nova vaga',
+      'Collaborator registra disponibilidade para appointment em um período de appointment criando uma nova slot',
   })
   @ApiResponse({
     status: 201,
-    description: 'disponibilidade da vaga registrada com sucesso!',
+    description: 'disponibilidade da slot registrada com sucesso!',
   })
   @ApiResponse({ status: 403, description: 'Permissões insuficientes' })
   @Post()

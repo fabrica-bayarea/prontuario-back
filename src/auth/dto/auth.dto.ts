@@ -11,20 +11,20 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export type GeneroEnum = 'MASCULINO' | 'FEMININO' | 'OUTRO';
+export type GeneroEnum = 'MALE' | 'FEMALE' | 'OTHER';
 
-export const generoEnum: GeneroEnum[] = ['MASCULINO', 'FEMININO', 'OUTRO'];
+export const generoEnum: GeneroEnum[] = ['MALE', 'FEMALE', 'OTHER'];
 
 export class SignUpUsuarioDto {
   @ApiProperty({ example: 'Cleber' })
-  @IsNotEmpty({ message: 'nome não deve ser omitido' })
-  @IsString({ message: 'nome deve ser uma string' })
-  nome: string;
+  @IsNotEmpty({ message: 'firstName não deve ser omitido' })
+  @IsString({ message: 'firstName deve ser uma string' })
+  firstName: string;
 
   @ApiProperty({ example: 'Guimarães' })
-  @IsNotEmpty({ message: 'sobrenome não deve ser omitido' })
-  @IsString({ message: 'nome deve ser uma string' })
-  sobrenome: string;
+  @IsNotEmpty({ message: 'lastName não deve ser omitido' })
+  @IsString({ message: 'firstName deve ser uma string' })
+  lastName: string;
 
   @ApiProperty({ example: 'cleber.guimaraes@email.com' })
   @IsEmail({}, { message: 'email deve ser um email válido' })
@@ -40,15 +40,15 @@ export class SignUpUsuarioDto {
 
   @ApiProperty({ example: '+5561995435997' })
   @IsOptional()
-  @IsString({ message: 'telefone deve ser uma string' })
+  @IsString({ message: 'phone deve ser uma string' })
   @IsPhoneNumber('BR', {
-    message: 'telefone deve ter o formato <CODIGO_DO_PAIS><DDD>xxxxxxxx',
+    message: 'phone deve ter o formato <CODIGO_DO_PAIS><DDD>xxxxxxxx',
   })
-  telefone: string;
+  phone: string;
 
   @ApiProperty({ example: 'brasilia' })
-  @IsString({ message: 'nome da cidade deve ser uma string' })
-  cidade: string;
+  @IsString({ message: 'firstName da city deve ser uma string' })
+  city: string;
 
   @ApiProperty({ example: '00000-00' })
   @IsString({ message: 'cep deve ser uma string' })
@@ -56,17 +56,19 @@ export class SignUpUsuarioDto {
 
   @ApiProperty({ example: 'Rua Exemplo, casa 123, Bairro' })
   @IsString({ message: 'endereço deve ser uma string' })
-  endereco: string;
+  address: string;
 
   @ApiProperty({ example: '2024-09-01T17:00:00' })
   @IsDateString()
-  nascimento: Date;
+  birthDate: Date;
 
-  @ApiProperty({ example: 'MASCULINO' })
+  @ApiProperty({ example: 'MALE' })
   @IsEnum(generoEnum, {
-    message: `Deve ser um dos seguintes dias da semana: ${generoEnum.join(', ')}`,
+    message: `Deve ser um dos seguintes dias da semana: ${generoEnum.join(
+      ', ',
+    )}`,
   })
-  genero: GeneroEnum;
+  gender: GeneroEnum;
 
   @ApiProperty({ example: 'Senha123!' })
   @IsStrongPassword(
@@ -79,9 +81,9 @@ export class SignUpUsuarioDto {
   senha: string;
 
   @ApiProperty({ example: '2386101945' })
-  @IsString({ message: 'matricula deve ser uma string' })
+  @IsString({ message: 'registration deve ser uma string' })
   @IsOptional()
-  matricula?: string;
+  registration?: string;
 }
 
 export class SignInUsuarioDto {

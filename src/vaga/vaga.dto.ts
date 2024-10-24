@@ -2,23 +2,23 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsInt, IsDateString, IsNotEmpty } from 'class-validator';
 
 export type VagaResponse = {
-  vaga: {
+  slot: {
     id: number;
-    data_hora_inicio: Date;
-    data_hora_fim: Date;
+    startDateTime: Date;
+    endDateTime: Date;
     colaborador: {
       id: number;
-      nome: string;
+      firstName: string;
     };
-    periodoAtendimento: {
+    appointmentPeriod: {
       id: number;
-      data_inicio: Date;
-      data_fim: Date;
-      horario_inicio: string;
-      horario_fim: string;
-      programa: {
+      startDate: Date;
+      endDate: Date;
+      startTime: string;
+      endTime: string;
+      program: {
         id: number;
-        nome: string;
+        name: string;
       };
     };
   };
@@ -28,13 +28,13 @@ export class CreateVagaDto {
   @ApiProperty({ example: 1 })
   @IsInt()
   @IsNotEmpty()
-  periodo_atendimento_id: number;
+  appointmentPeriodId: number;
 
   @ApiProperty({ example: '2024-09-01T08:00:00' })
   @IsDateString()
-  data_hora_inicio: Date;
+  startDateTime: Date;
 
   @ApiProperty({ example: '2024-09-01T17:00:00' })
   @IsDateString()
-  data_hora_fim: Date;
+  endDateTime: Date;
 }

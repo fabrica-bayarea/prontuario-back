@@ -1,49 +1,45 @@
 import { IsNotEmpty, IsString, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export type StatusEnum =
-  | 'AGENDADO'
-  | 'REALIZADO'
-  | 'CANCELADO'
-  | 'NAOCOMPARECEU';
+export type StatusEnum = 'SCHEDULED' | 'COMPLETED' | 'CANCELED' | 'NO_SHOW';
 
 export const statusEnum: StatusEnum[] = [
-  'AGENDADO',
-  'REALIZADO',
-  'CANCELADO',
-  'NAOCOMPARECEU',
+  'SCHEDULED',
+  'COMPLETED',
+  'CANCELED',
+  'NO_SHOW',
 ];
 
 export type AtendimentoResponse = {
-  atendimento: {
+  appointment: {
     id: number;
     status: StatusEnum;
-    observacao: string;
+    observation: string;
     beneficiario: {
       id: number;
-      nome: string;
+      firstName: string;
       cpf: string;
       email: string;
-      telefone: string;
+      phone: string;
     };
-    vaga: {
+    slot: {
       id: number;
-      dataHoraInicio: Date;
-      dataHoraFim: Date;
+      startDateTime: Date;
+      endDateTime: Date;
       colaborador: {
         id: number;
-        nome: string;
+        firstName: string;
         cpf: string;
         email: string;
-        telefone: string;
-        matricula: string;
+        phone: string;
+        registration: string;
       };
-      periodoAtendimento: {
+      AppointmentPeriod: {
         id: number;
-        programa: {
+        program: {
           id: number;
-          nome: string;
-          descricao: string;
+          name: string;
+          description: string;
         };
       };
     };
@@ -58,7 +54,7 @@ export class CreateAtendimentoDto {
   @ApiProperty({ example: 'Jovens conectados' })
   @IsString()
   @IsNotEmpty()
-  observacao: string;
+  observation: string;
 }
 
 export class GetAtendimentoByCpfDto {

@@ -10,14 +10,14 @@ import {
 export type createPeriodoAtendimentoResponse = {
   periodo_atendimento: {
     id: number;
-    data_inicio: Date;
-    data_fim: Date;
-    horario_inicio: string;
-    horario_fim: string;
-    dias_da_semana: string[];
-    programa: {
+    startDate: Date;
+    endDate: Date;
+    startTime: string;
+    endTime: string;
+    daysOfWeek: string[];
+    program: {
       id: number;
-      nome: string;
+      firstName: string;
     };
   };
 };
@@ -26,25 +26,25 @@ export class CreatePeriodoAtendimentoDto {
   @ApiProperty({ example: 'Jovens conectados' })
   @IsString()
   @IsNotEmpty()
-  nome_programa: string;
+  name: string;
 
   @ApiProperty({ example: '2024-09-01' })
   @IsDateString()
-  data_inicio: Date;
+  startDate: Date;
 
   @ApiProperty({ example: '2024-09-01' })
   @IsDateString()
-  data_fim: Date;
+  endDate: Date;
 
   @ApiProperty({ example: '08:00' })
   @IsString()
   @IsNotEmpty()
-  horario_inicio: string;
+  startTime: string;
 
   @ApiProperty({ example: '17:00' })
   @IsString()
   @IsNotEmpty()
-  horario_fim: string;
+  endTime: string;
 
   @ApiProperty({ example: '["DOMINGO", "SEGUNDA", "TERCA"]' })
   @IsArray({ message: 'dias da semana deve ser um array.' })
@@ -52,5 +52,5 @@ export class CreatePeriodoAtendimentoDto {
     ['DOMINGO', 'SEGUNDA', 'TERCA', 'QUARTA', 'QUINTA', 'SEXTA', 'SABADO'],
     { each: true },
   )
-  dias_da_semana: string[];
+  daysOfWeek: string[];
 }

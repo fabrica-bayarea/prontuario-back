@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { AuthService } from 'src/auth/auth.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { createDependenteDto } from './dependente.dto';
-import { Dependente } from '@prisma/client';
+import { Dependent } from '@prisma/client';
 
 @Injectable()
 export class DependenteService {
@@ -14,23 +14,23 @@ export class DependenteService {
   async createDependente(
     idUser: number,
     dto: createDependenteDto,
-  ): Promise<Dependente> {
-    const dependente = await this.prisma.dependente.create({
+  ): Promise<Dependent> {
+    const dependent = await this.prisma.dependent.create({
       data: {
-        nome: dto.nome,
-        sobrenome: dto.sobrenome,
-        nascimento: new Date(dto.nascimento),
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        birthDate: new Date(dto.birthDate),
         cpf: dto.cpf,
         email: dto.email,
-        telefone: dto.telefone,
-        genero: dto.genero,
-        parentesco: dto.parentesco,
-        necessidade_especial: dto.necessidade_especial,
-        Usuario: {
+        phone: dto.phone,
+        gender: dto.gender,
+        relationship: dto.relationship,
+        specialNeeds: dto.specialNeeds,
+        User: {
           connect: { id: idUser },
         },
       },
     });
-    return dependente;
+    return dependent;
   }
 }

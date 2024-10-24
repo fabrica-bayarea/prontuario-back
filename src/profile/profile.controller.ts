@@ -3,7 +3,7 @@ import { ProfileService } from './profile.service';
 import { Body, Controller, Get, Put, UseGuards, Request } from '@nestjs/common';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { ProfileDto, UpdateProfileDto } from './profile.dto';
-import { Programa } from '@prisma/client';
+import { Program } from '@prisma/client';
 
 @ApiTags('Operações de manutenção de perfil de usuário')
 @Controller('profile')
@@ -39,15 +39,13 @@ export class ProfileController {
   }
 
   @ApiOperation({
-    summary: 'Operação de listar todos programas',
-    description: 'Operação de listar todos programas que o usuário participa',
+    summary: 'Operação de listar todos program',
+    description: 'Operação de listar todos program que o usuário participa',
   })
   @ApiResponse({ status: 200, description: 'Programas listado com sucesso' })
   @ApiResponse({ status: 404, description: 'Perfil não encontrado' })
-  @Get('programas/')
-  async getProgramsParticipate(
-    @Request() req,
-  ): Promise<Programa[]> {
+  @Get('program/')
+  async getProgramsParticipate(@Request() req): Promise<Program[]> {
     const idUser = req.user.id;
     return this.profileService.getProgramsParticipate(idUser);
   }

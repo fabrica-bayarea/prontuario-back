@@ -27,42 +27,42 @@ export class PeriodoAtendimentoService {
       throw new ForbiddenException('permissões insuficientes.');
     }
 
-    const programa = await this.prisma.programa.findUnique({
+    const program = await this.prisma.program.findUnique({
       where: {
-        nome: dto.nome_programa,
+        name: dto.name,
       },
     });
 
-    if (!programa) {
+    if (!program) {
       throw new NotFoundException(
-        `programa com nome ${dto.nome_programa} não encontrado`,
+        `program com firstName ${dto.name} não encontrado`,
       );
     }
 
-    const periodoAtendimentos = await this.prisma.periodo_Atendimento.create({
+    const periodoAtendimentos = await this.prisma.appointmentPeriod.create({
       data: {
-        programaId: programa.id,
-        data_inicio: new Date(dto.data_inicio),
-        data_fim: new Date(dto.data_fim),
-        horario_inicio: dto.horario_inicio,
-        horario_fim: dto.horario_fim,
-        dias_da_semana: this.convertDaysWeeks(dto.dias_da_semana) as number,
+        programId: program.id,
+        startDate: new Date(dto.startDate),
+        endDate: new Date(dto.endDate),
+        startTime: dto.startTime,
+        endTime: dto.endTime,
+        daysOfWeek: this.convertDaysWeeks(dto.daysOfWeek) as number,
       },
     });
 
     const response: createPeriodoAtendimentoResponse = {
       periodo_atendimento: {
         id: periodoAtendimentos.id,
-        data_inicio: periodoAtendimentos.data_inicio,
-        data_fim: periodoAtendimentos.data_fim,
-        horario_inicio: periodoAtendimentos.horario_inicio,
-        horario_fim: periodoAtendimentos.horario_fim,
-        dias_da_semana: this.convertDaysWeeks(
-          periodoAtendimentos.dias_da_semana,
+        startDate: periodoAtendimentos.startDate,
+        endDate: periodoAtendimentos.endDate,
+        startTime: periodoAtendimentos.startTime,
+        endTime: periodoAtendimentos.endTime,
+        daysOfWeek: this.convertDaysWeeks(
+          periodoAtendimentos.daysOfWeek,
         ) as string[],
-        programa: {
-          id: programa.id,
-          nome: programa.nome,
+        program: {
+          id: program.id,
+          firstName: program.name,
         },
       },
     };

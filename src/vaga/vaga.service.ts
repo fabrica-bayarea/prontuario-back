@@ -26,15 +26,13 @@ export class VagaService {
       throw new ForbiddenException('permissões insuficientes.');
     }
 
-    const periodoAtendimento = await this.prisma.periodo_Atendimento.findUnique(
-      {
-        where: {
-          id: createVagaDto.periodo_atendimento_id,
-        },
+    const periodoAtendimento = await this.prisma.appointmentPeriod.findUnique({
+      where: {
+        id: createVagaDto.appointmentPeriodId,
       },
-    );
+    });
 
-    const colaborador = await this.prisma.usuario.findUnique({
+    const colaborador = await this.prisma.user.findUnique({
       where: {
         id: idUsuario,
       },
@@ -46,39 +44,39 @@ export class VagaService {
       );
     }
 
-    const vaga = await this.prisma.vaga.create({
+    const slot = await this.prisma.slot.create({
       data: {
-        data_hora_inicio: new Date(createVagaDto.data_hora_inicio),
-        data_hora_fim: new Date(createVagaDto.data_hora_fim),
-        colaboradorId: colaborador.id,
-        periodoAtendimentoId: periodoAtendimento.id,
+        startDateTime: new Date(createVagaDto.startDateTime),
+        endDateTime: new Date(createVagaDto.endDateTime),
+        collaboratorId: colaborador.id,
+        appointmentPeriodId: periodoAtendimento.id,
       },
     });
 
-    const programa = await this.prisma.programa.findUnique({
+    const program = await this.prisma.program.findUnique({
       where: {
-        id: periodoAtendimento.programaId,
+        id: periodoAtendimento.programId,
       },
     });
 
     const response: VagaResponse = {
-      vaga: {
-        id: vaga.id,
-        data_hora_inicio: vaga.data_hora_inicio,
-        data_hora_fim: vaga.data_hora_fim,
+      slot: {
+        id: slot.id,
+        startDateTime: slot.startDateTime,
+        endDateTime: slot.endDateTime,
         colaborador: {
           id: colaborador.id,
-          nome: colaborador.nome,
+          firstName: colaborador.firstName,
         },
-        periodoAtendimento: {
+        appointmentPeriod: {
           id: periodoAtendimento.id,
-          data_inicio: periodoAtendimento.data_inicio,
-          data_fim: periodoAtendimento.data_fim,
-          horario_inicio: periodoAtendimento.horario_inicio,
-          horario_fim: periodoAtendimento.horario_fim,
-          programa: {
-            id: programa.id,
-            nome: programa.nome,
+          startDate: periodoAtendimento.startDate,
+          endDate: periodoAtendimento.endDate,
+          startTime: periodoAtendimento.startTime,
+          endTime: periodoAtendimento.endTime,
+          program: {
+            id: program.id,
+            name: program.name,
           },
         },
       },

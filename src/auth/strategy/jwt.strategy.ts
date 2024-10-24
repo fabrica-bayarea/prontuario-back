@@ -3,7 +3,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Usuario } from '@prisma/client';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -20,33 +20,35 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload: {
     sub: number;
-    tipo: 'ADMINISTRADOR' | 'CADASTRADOR' | 'BENEFICIARIO';
-  }): Promise<Usuario> {
+    userType: 'ADMINISTRADOR' | 'CADASTRADOR' | 'BENEFICIARIO';
+  }): Promise<User> {
     if (
-      !['ADMINISTRADOR', 'CADASTRADOR', 'BENEFICIARIO'].includes(payload.tipo)
+      !['ADMINISTRADOR', 'CADASTRADOR', 'BENEFICIARIO'].includes(
+        payload.userType,
+      )
     ) {
       throw new UnauthorizedException('Tipo de usuário inválido');
     }
 
-    let usuario: Usuario;
+    let user: User;
     try {
-      switch (payload.tipo) {
+      switch (payload.userType) {
         case 'ADMINISTRADOR':
-          usuario = await this.prisma.usuario.findUnique({
+          user = await this.prisma.user.findUnique({
             where: {
               id: payload.sub,
             },
           });
           break;
         case 'CADASTRADOR':
-          usuario = await this.prisma.usuario.findUnique({
+          user = await this.prisma.user.findUnique({
             where: {
               id: payload.sub,
             },
           });
           break;
         case 'BENEFICIARIO':
-          usuario = await this.prisma.usuario.findUnique({
+          user = await this.prisma.user.findUnique({
             where: {
               id: payload.sub,
             },
@@ -57,11 +59,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Usuário não encontrado');
     }
 
-    if (!usuario || typeof usuario !== 'object') {
+    if (!user || typeof user !== 'object') {
       throw new UnauthorizedException('Usuário inválido');
     }
 
-    delete usuario.hash;
-    return usuario;
+    delete user.hash;
+    return user;
   }
 }

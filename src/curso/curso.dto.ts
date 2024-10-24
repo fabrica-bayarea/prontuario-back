@@ -5,17 +5,17 @@ export class CreateCursoDto {
   @ApiProperty({ example: 'Ciência da Computação' })
   @IsString()
   @IsNotEmpty()
-  nome: string;
+  name: string;
 
-  @ApiProperty({ example: 'Descrição do curso' })
+  @ApiProperty({ example: 'Descrição do course' })
   @IsString()
   @IsNotEmpty()
-  descricao: string;
+  description: string;
 
   @ApiProperty({ example: 'João Silva' })
   @IsString()
   @IsNotEmpty()
-  coordenador: string;
+  coordinator: string;
 
   @ApiProperty({ example: 'Campus da Asa Sul' })
   @IsString()
@@ -27,17 +27,17 @@ export class UpdateCursoDto {
   @ApiProperty({ example: 'Direito' })
   @IsOptional()
   @IsString()
-  nome?: string;
+  name?: string;
 
-  @ApiProperty({ example: 'Descrição atualizada do curso' })
+  @ApiProperty({ example: 'Descrição atualizada do course' })
   @IsOptional()
   @IsString()
-  descricao?: string;
+  description?: string;
 
   @ApiProperty({ example: 'Maria Oliveira' })
   @IsOptional()
   @IsString()
-  coordenador?: string;
+  coordinator?: string;
 
   @ApiProperty({ example: 'Campus Norte' })
   @IsOptional()

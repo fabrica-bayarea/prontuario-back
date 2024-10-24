@@ -5,46 +5,46 @@ export class CreateProgramaDto {
   @ApiProperty({ example: 'Jovens conectados' })
   @IsNotEmpty()
   @IsString()
-  nome: string;
+  name: string;
 
   @ApiProperty({
-    example: 'Programa para jovens interessados em tecnologia',
+    example: 'Program para jovens interessados em tecnologia',
   })
   @IsNotEmpty()
   @IsString()
-  descricao: string;
+  description: string;
 
   @ApiProperty({ example: 'Ciência da Computação' })
   @IsNotEmpty()
-  curso: number | string;
+  course: number | string;
 
   @ApiProperty({ example: 'Jovens de 15 a 18 anos' })
   @IsNotEmpty()
   @IsString()
-  publico_alvo: string;
+  targetAudience: string;
 }
 
 export class UpdateProgramaDto {
   @ApiProperty({ example: 'Culinária Nordestina' })
   @IsOptional()
   @IsString()
-  nome?: string;
+  name?: string;
 
   @ApiProperty({
-    example: 'Curso de culinaria focado na gastronomia nordestina',
+    example: 'Course de culinaria focado na gastronomia nordestina',
   })
   @IsOptional()
   @IsString()
-  descricao?: string;
+  description?: string;
 
   @ApiProperty({ example: 'Adultos de 25 a 40 anos' })
   @IsOptional()
   @IsString()
-  publico_alvo?: string;
+  targetAudience?: string;
 }
 
 export class CursoProgramaDto {
   @ApiProperty({ example: 'Psicologia' })
   @IsNotEmpty()
-  curso: number | string;
+  course: number | string;
 }

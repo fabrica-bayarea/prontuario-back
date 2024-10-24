@@ -20,7 +20,7 @@ import { JwtGuard } from './guard/jwt.guard';
 @ApiTags('Operações de manutenção de Usuários')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) { }
+  constructor(private authService: AuthService) {}
 
   @ApiOperation({
     summary: 'Cadastra um novo Usuário',
@@ -63,8 +63,8 @@ export class AuthController {
     summary: 'Desativa a conta do usuário logado',
     description: 'Desativa a conta do usuário e grava em banco de dados',
   })
-  @ApiResponse({ status: 200, description: 'Usuario desativado' })
-  @ApiResponse({ status: 401, description: 'Usuario não logado' })
+  @ApiResponse({ status: 200, description: 'User desativado' })
+  @ApiResponse({ status: 401, description: 'User não logado' })
   @Patch('disable-user/')
   @UseGuards(JwtGuard)
   disableUser(@Request() req) {

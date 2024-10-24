@@ -5,135 +5,135 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql" // ou o banco de dados de sua escolha
+  provider = "postgresql" // or the database of your choice
   url      = env("DATABASE_URL")
 }
 
 enum Status {
-  AGENDADO
-  REALIZADO
-  CANCELADO
-  NAOCOMPARECEU
+  SCHEDULED
+  COMPLETED
+  CANCELED
+  NO_SHOW
 }
 
-enum Genero {
-  MASCULINO
-  FEMININO
-  OUTRO
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
 }
 
-enum TipoUsuario {
-  ADMINISTRADOR
-  COLABORADOR
-  CADASTRADOR
-  BENEFICIARIO
+enum UserType {
+  ADMINISTRATOR
+  COLLABORATOR
+  REGISTRAR
+  BENEFICIARY
 }
 
-enum Parentesco {
-  PAI
-  MAE
-  IRMAO
-  IRMA
-  FILHO
-  FILHA
-  OUTRO
+enum Relationship {
+  FATHER
+  MOTHER
+  BROTHER
+  SISTER
+  SON
+  DAUGHTER
+  OTHER
 }
 
-model Periodo_Atendimento {
-  id             Int      @id @default(autoincrement())
-  Programa       Programa @relation(fields: [programaId], references: [id])
-  programaId     Int
-  data_inicio    DateTime
-  data_fim       DateTime
-  horario_inicio String   @db.Char(5)
-  horario_fim    String   @db.Char(5)
-  dias_da_semana Int
+model AppointmentPeriod {
+  id         Int      @id @default(autoincrement())
+  Program    Program  @relation(fields: [programId], references: [id])
+  programId  Int
+  startDate  DateTime
+  endDate    DateTime
+  startTime  String   @db.Char(5)
+  endTime    String   @db.Char(5)
+  daysOfWeek Int
 
-  Vaga        Vaga[]
-  Atendimento Atendimento[]
+  slot        Slot[]
+  appointment Appointment[]
 }
 
-model Atendimento {
-  id                   Int                 @id @default(autoincrement())
-  Periodo_Atendimento  Periodo_Atendimento @relation(fields: [periodoAtendimentoId], references: [id])
-  periodoAtendimentoId Int
-  Beneficiario         Usuario             @relation(fields: [beneficiarioId], references: [id])
-  beneficiarioId       Int
-  Vaga                 Vaga                @relation(fields: [vagaId], references: [id])
-  vagaId               Int
-  status               Status              @default(AGENDADO)
-  observacao           String?             @db.VarChar(800)
+model Appointment {
+  id                  Int               @id @default(autoincrement())
+  AppointmentPeriod   AppointmentPeriod @relation(fields: [appointmentPeriodId], references: [id])
+  appointmentPeriodId Int
+  Beneficiary         User              @relation(fields: [beneficiaryId], references: [id])
+  beneficiaryId       Int
+  Slot                Slot              @relation(fields: [slotId], references: [id])
+  slotId              Int
+  status              Status            @default(SCHEDULED)
+  observation         String?           @db.VarChar(800)
 }
 
-model Vaga {
-  id                   Int                 @id @default(autoincrement())
-  Colaborador          Usuario             @relation(fields: [colaboradorId], references: [id])
-  colaboradorId        Int
-  Periodo_Atendimento  Periodo_Atendimento @relation(fields: [periodoAtendimentoId], references: [id])
-  periodoAtendimentoId Int
-  data_hora_inicio     DateTime
-  data_hora_fim        DateTime
+model Slot {
+  id                  Int               @id @default(autoincrement())
+  Collaborator        User              @relation(fields: [collaboratorId], references: [id])
+  collaboratorId      Int
+  AppointmentPeriod   AppointmentPeriod @relation(fields: [appointmentPeriodId], references: [id])
+  appointmentPeriodId Int
+  startDateTime       DateTime
+  endDateTime         DateTime
 
-  Atendimento Atendimento[]
+  appointment Appointment[]
 }
 
-model Curso {
+model Course {
   id          Int    @id @default(autoincrement())
-  nome        String @unique @db.VarChar(150)
-  descricao   String @db.VarChar(500)
-  coordenador String @db.VarChar(150)
+  name        String @unique @db.VarChar(150)
+  description String @db.VarChar(500)
+  coordinator String @db.VarChar(150)
   campus      String @db.VarChar(150)
 
-  usuarios  Usuario[]  @relation("UsuarioCurso")
-  programas Programa[] @relation("CursoPrograma")
+  user    User[]    @relation("UserCourse")
+  program Program[] @relation("CourseProgram")
 }
 
-model Programa {
-  id           Int    @id @default(autoincrement())
-  nome         String @unique @db.VarChar(150)
-  descricao    String @db.VarChar(500)
-  publico_alvo String @db.VarChar(100)
+model Program {
+  id             Int    @id @default(autoincrement())
+  name           String @unique @db.VarChar(150)
+  description    String @db.VarChar(500)
+  targetAudience String @db.VarChar(100)
 
-  cursos               Curso[]               @relation("CursoPrograma")
-  usuarios             Usuario[]             @relation("UsuarioPrograma")
-  periodo_atendimentos Periodo_Atendimento[]
+  course            Course[]            @relation("CourseProgram")
+  user              User[]              @relation("UserProgram")
+  appointmentPeriod AppointmentPeriod[]
 }
 
-model Usuario {
-  id         Int         @id @default(autoincrement())
-  nome       String      @db.VarChar(50)
-  sobrenome  String      @db.VarChar(200)
-  cpf        String      @unique @db.Char(14)
-  ativo      Boolean     @default(true)
-  cep        String      @db.Char(9)
-  cidade     String      @db.VarChar(200)
-  endereco   String      @db.VarChar(300)
-  nascimento DateTime
-  genero     Genero
-  email      String      @unique @db.VarChar(360)
-  hash       String
-  telefone   String      @db.Char(14)
-  tipo       TipoUsuario
-  matricula  String?     @db.VarChar(15)
+model User {
+  id           Int      @id @default(autoincrement())
+  firstName    String   @db.VarChar(50)
+  lastName     String   @db.VarChar(200)
+  cpf          String   @unique @db.Char(14)
+  active       Boolean  @default(true)
+  cep          String   @db.Char(9)
+  city         String   @db.VarChar(200)
+  address      String   @db.VarChar(300)
+  birthDate    DateTime
+  gender       Gender
+  email        String   @unique @db.VarChar(360)
+  hash         String
+  phone        String   @db.Char(14)
+  userType     UserType
+  registration String?  @db.VarChar(15)
 
-  cursos       Curso[]       @relation("UsuarioCurso")
-  programas    Programa[]    @relation("UsuarioPrograma")
-  dependentes  Dependente[]
-  atendimentos Atendimento[]
-  Vaga         Vaga[]
+  course      Course[]      @relation("UserCourse")
+  program     Program[]     @relation("UserProgram")
+  dependent   Dependent[]
+  appointment Appointment[]
+  slot        Slot[]
 }
 
-model Dependente {
-  id                   Int       @id @default(autoincrement())
-  Usuario              Usuario   @relation(fields: [usuarioId], references: [id])
-  usuarioId            Int
-  nome                 String    @db.VarChar(50)
-  sobrenome            String    @db.VarChar(200)
-  cpf                  String    @unique @db.Char(14)
-  nascimento           DateTime
-  genero               Genero
-  parentesco           Parentesco    
-  necessidade_especial String?   @db.VarChar(500)
-  email                String    @unique @db.VarChar(360)
-  telefone             String    @db.Char(14)
+model Dependent {
+  id           Int          @id @default(autoincrement())
+  User         User         @relation(fields: [userId], references: [id])
+  userId       Int
+  firstName    String       @db.VarChar(50)
+  lastName     String       @db.VarChar(200)
+  cpf          String       @unique @db.Char(14)
+  birthDate    DateTime
+  gender       Gender
+  relationship Relationship
+  specialNeeds String?      @db.VarChar(500)
+  email        String       @unique @db.VarChar(360)
+  phone        String       @db.Char(14)
 }
